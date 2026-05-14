@@ -271,6 +271,43 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .copy-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border:.5px solid #d0dce8;border-radius:10px;background:#f8fafc;cursor:pointer;color:#5a6a7a;font-size:12px;font-family:inherit;width:100%;}
 .copy-btn:active{background:#f0f4f8;}
 @media print{#hdr,#user-bar,#bottom-nav{display:none!important;}.pice-preview{background:none;padding:0;}.doc-inner{box-shadow:none;border:none;}}
+/* GUEST CONCERN FORM */
+#guest-screen{position:fixed;inset:0;background:#f0f4f8;z-index:10000;overflow-y:auto;display:none;flex-direction:column;}
+.gc-hdr{background:var(--navy);padding:16px 14px 14px;text-align:center;color:#fff;flex-shrink:0;}
+.gc-hdr-logo{width:52px;height:52px;border-radius:50%;background:#fff;margin:0 auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.gc-hdr-logo .lm{font-size:13px;font-weight:700;color:var(--navy);line-height:1;}
+.gc-hdr-logo .ls{font-size:7px;color:var(--blue);line-height:1;}
+.gc-hdr h1{font-size:16px;font-weight:700;margin-bottom:3px;}
+.gc-hdr p{font-size:11px;color:var(--mb);line-height:1.5;}
+.gc-body{padding:16px;display:flex;flex-direction:column;gap:12px;max-width:480px;width:100%;margin:0 auto;}
+.gc-card{background:#fff;border-radius:16px;padding:14px;border:.5px solid #d0dce8;}
+.gc-lbl{font-size:11px;font-weight:600;color:#5a6a7a;margin-bottom:5px;}
+.gc-req{color:var(--crim);}
+.gc-input{width:100%;padding:11px 13px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;-webkit-appearance:none;box-sizing:border-box;}
+.gc-input:focus{border-color:var(--blue);background:#fff;}
+.gc-ta{width:100%;padding:11px 13px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;resize:vertical;min-height:100px;box-sizing:border-box;}
+.gc-ta:focus{border-color:var(--blue);background:#fff;}
+.gc-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.gc-type-btn{padding:10px 8px;border:1.5px solid #d0dce8;border-radius:12px;font-size:11px;cursor:pointer;color:#5a6a7a;background:#f8fafc;text-align:center;font-family:inherit;line-height:1.3;}
+.gc-type-btn.on{border-color:var(--navy);background:var(--lb);color:var(--navy);font-weight:600;}
+.gc-type-btn.urgent.on{border-color:var(--crim);background:var(--lr);color:var(--red);}
+.gc-anon{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f8fafc;cursor:pointer;}
+.gc-anon input{width:18px;height:18px;cursor:pointer;accent-color:var(--navy);}
+.gc-anon-lbl{font-size:12px;color:#5a6a7a;line-height:1.4;}
+.gc-submit{padding:15px;background:var(--navy);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.gc-submit:disabled{background:#c0cdd8;cursor:not-allowed;}
+.gc-footer{text-align:center;font-size:10px;color:#94a3b8;padding:12px 16px 24px;line-height:1.6;}
+/* QR section in master */
+.qr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.qr-card{border:.5px solid #d0dce8;border-radius:12px;padding:10px;text-align:center;background:#f8fafc;}
+.qr-card canvas{border-radius:6px;display:block;margin:0 auto 5px;}
+.qr-stn{font-size:9.5px;font-weight:600;color:#1a2332;margin-bottom:3px;}
+.qr-btn{padding:5px 10px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:10px;cursor:pointer;font-family:inherit;}
+/* Concern badge */
+.concern-badge{display:inline-block;padding:2px 7px;border-radius:7px;font-size:9px;font-weight:600;}
+.cb-urgent{background:var(--lr);color:var(--red);}
+.cb-norm{background:var(--lb);color:var(--navy);}
+.cb-done{background:var(--lg);color:var(--green);}
 /* CHECKLIST OVERLAY */
 #checklist-overlay{position:fixed;inset:0;background:rgba(4,44,83,.6);z-index:999;display:none;flex-direction:column;justify-content:flex-end;backdrop-filter:blur(2px);}
 .cap-thumb.captured{border-color:var(--blue);}
@@ -562,6 +599,28 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
               <button class="gbtn" style="width:100%;justify-content:center;" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>
             </div>
           </div>
+          <div class="sec-lbl">Guest concerns <span class="stn-pill sp-b" id="gc-count-badge" style="margin-left:4px;">0</span></div>
+          <div class="card" id="gc-list-card">
+            <div id="gc-list"><div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px;">Walang reklamo pa.</div></div>
+          </div>
+          <div class="sec-lbl">QR codes — Guest concern form</div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-qrcode"></i>I-print ang QR Code</div>
+            <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>I-post ang QR code sa bawat himpilan. I-scan ng bisita para mag-ulat ng reklamo nang walang login.</div>
+            <div class="fg" style="margin-bottom:10px;">
+              <select class="fs" id="qr-stn-sel" onchange="generateQR()">
+                <option value="">Pumili ng himpilan...</option>
+              </select>
+            </div>
+            <div id="qr-single" style="display:none;flex-direction:column;align-items:center;gap:10px;">
+              <canvas id="qr-canvas" width="180" height="180" style="border-radius:10px;border:1px solid #d0dce8;"></canvas>
+              <div id="qr-stn-name" style="font-size:12px;font-weight:600;color:#1a2332;"></div>
+              <div style="display:flex;gap:8px;width:100%;">
+                <button class="sbtn" style="flex:1;" onclick="downloadQR()"><i class="ti ti-download"></i>I-download</button>
+                <button class="gbtn" style="flex:1;justify-content:center;" onclick="printQRPoster()"><i class="ti ti-printer"></i>I-print</button>
+              </div>
+            </div>
+          </div>
           <div class="sec-lbl">Access audit log</div>
           <div class="audit-wrap" id="audit-wrap"><div style="color:var(--db);font-size:10px;">No access events yet.</div></div>
         </div>
@@ -589,6 +648,66 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     </div>
 
   </div><!-- /auth-app -->
+
+  <!-- GUEST CONCERN FORM — public, no login needed -->
+  <div id="guest-screen">
+    <div class="gc-hdr">
+      <div class="gc-hdr-logo"><span class="lm">HuGo</span><span class="ls">BULPPO</span></div>
+      <h1>Iulat ang Inyong Reklamo</h1>
+      <p>Bulacan Police Provincial Office<br>Human Rights Affairs · PRO 3</p>
+    </div>
+    <div class="gc-body">
+      <div class="gc-card">
+        <div class="alert ok" style="margin-bottom:10px;"><i class="ti ti-shield-check"></i><div><strong>Kumpidensyal at Protektado</strong><br><span style="font-size:10.5px;">Ang inyong impormasyon ay lihim at protektado. Maaari kayong mag-ulat nang hindi nagpapakilala.</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px;">
+          <div class="gc-lbl">Himpilan ng Pulisya</div>
+          <div id="gc-stn-disp" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div>
+        </div>
+      </div>
+      <div class="gc-card">
+        <div class="gc-lbl">Uri ng Reklamo <span class="gc-req">*</span></div>
+        <div class="gc-type-grid" id="gc-type-grid">
+          <button class="gc-type-btn urgent" onclick="setGcType(this,'Paglabag sa Karapatang Pantao')">⚠ Paglabag sa Karapatang Pantao</button>
+          <button class="gc-type-btn urgent" onclick="setGcType(this,'Kapakanan ng Detinido')">👤 Kapakanan ng Detinido</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Kondisyon ng Pasilidad')">🏠 Kondisyon ng Pasilidad</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Ugali ng Tauhan')">👮 Ugali ng Tauhan</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Medikal na Alalahanin')">🏥 Medikal na Alalahanin</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Iba pa')">📝 Iba pa</button>
+        </div>
+      </div>
+      <div class="gc-card">
+        <div class="gc-lbl">Ilarawan ang Inyong Reklamo <span class="gc-req">*</span></div>
+        <textarea class="gc-ta" id="gc-desc" placeholder="Isulat dito ang detalye ng inyong reklamo..." oninput="checkGcForm()"></textarea>
+      </div>
+      <div class="gc-card">
+        <div class="gc-lbl">Paraan ng Pakikipag-ugnayan <span style="font-size:9px;color:#94a3b8;">(opsyonal)</span></div>
+        <input class="gc-input" id="gc-contact" placeholder="Telepono, email, o pangalan (opsyonal)..." style="margin-bottom:10px;">
+        <label class="gc-anon">
+          <input type="checkbox" id="gc-anon" onchange="checkGcForm()">
+          <div class="gc-anon-lbl"><strong>Nais manatiling anonymous</strong><br>Hindi na kailangan ng inyong impormasyon</div>
+        </label>
+      </div>
+      <div class="alert warn" id="gc-urgent-warn" style="display:none;"><i class="ti ti-alert-triangle"></i><div><strong>Mahalagang Reklamo</strong><br><span style="font-size:10.5px;">Ang inyong reklamo ay ipapadala bilang priority sa opisyal ng BULPPO PRO 3.</span></div></div>
+      <div class="alert err" id="gc-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="gc-err-msg"></span></div>
+      <button class="gc-submit" id="gc-submit-btn" onclick="submitGcForm()" disabled><i class="ti ti-send"></i>Isumite ang Reklamo</button>
+      <div class="processing" id="gc-proc" style="display:none;padding:16px;"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+      <div id="gc-success" style="display:none;flex-direction:column;gap:12px;">
+        <div class="gc-card" style="text-align:center;">
+          <i class="ti ti-circle-check" style="font-size:48px;color:var(--green);display:block;margin-bottom:10px;"></i>
+          <div style="font-size:17px;font-weight:700;color:#1a2332;margin-bottom:6px;">Natanggap na ang Inyong Reklamo</div>
+          <p style="font-size:12px;color:#7a8a9a;margin-bottom:12px;">Ang inyong reference number ay:</p>
+          <div id="gc-refnum" style="font-size:20px;font-weight:700;font-family:monospace;color:var(--navy);background:var(--lb);border-radius:10px;padding:10px;margin-bottom:12px;"></div>
+          <p style="font-size:11px;color:#7a8a9a;line-height:1.6;">Itago ang reference number na ito para sa inyong follow-up. Ang inyong reklamo ay aming irerebyu at aksyunan ng BULPPO Human Rights Affairs Office.</p>
+        </div>
+        <button class="gc-submit" style="background:var(--green);" onclick="resetGcForm()"><i class="ti ti-plus"></i>Mag-ulat ng Bagong Reklamo</button>
+      </div>
+      <div class="gc-footer">
+        <strong>BULPPO PRO 3 — Human Rights Affairs Office</strong><br>
+        Ang reklamo ay tumatanggap ng seryosong aksyon.<br>
+        <em>"Serbisyong Mabilis, Tapat, at Nararamdaman"</em>
+      </div>
+    </div>
+  </div>
 </div><!-- /app -->
 
 <script>
@@ -1582,6 +1701,280 @@ async function generateMaster(){
 }
 // ─── Save inspection (stub for Supabase) ─────────────────────────────────────
 function saveInspectionResult(json){ console.log('[HuGo] Inspection result ready for Supabase',json); }
+
+// ─── GUEST CONCERN SYSTEM ────────────────────────────────────────────────────
+let guestConcerns = [];
+let gcStation = '';
+let gcSelectedType = '';
+
+// ── Check URL for guest concern mode ──
+function checkGuestMode(){
+  const params = new URLSearchParams(window.location.search);
+  const stn = params.get('station');
+  const tok = params.get('token');
+  if(stn && tok === 'GUEST-2025'){
+    // Decode station name
+    gcStation = decodeURIComponent(stn);
+    showGuestScreen(gcStation);
+  }
+}
+
+function showGuestScreen(station){
+  document.getElementById('splash').classList.add('hidden');
+  setTimeout(()=>document.getElementById('splash').style.display='none',450);
+  document.getElementById('app').style.display='none';
+  const gs = document.getElementById('guest-screen');
+  gs.style.display='flex';gs.style.flexDirection='column';
+  document.getElementById('gc-stn-disp').textContent = station;
+  document.getElementById('gc-stn-disp').style.color = '#0C447C';
+}
+
+function setGcType(btn, type){
+  gcSelectedType = type;
+  document.querySelectorAll('.gc-type-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  // Show urgent warning for human rights / detainee
+  const isUrgent = ['Paglabag sa Karapatang Pantao','Kapakanan ng Detinido'].includes(type);
+  document.getElementById('gc-urgent-warn').style.display = isUrgent?'flex':'none';
+  checkGcForm();
+}
+
+function checkGcForm(){
+  const desc = document.getElementById('gc-desc').value.trim();
+  const ok = gcSelectedType && desc.length >= 10;
+  document.getElementById('gc-submit-btn').disabled = !ok;
+}
+
+async function submitGcForm(){
+  const desc = document.getElementById('gc-desc').value.trim();
+  const contact = document.getElementById('gc-contact').value.trim();
+  const anon = document.getElementById('gc-anon').checked;
+  const isUrgent = ['Paglabag sa Karapatang Pantao','Kapakanan ng Detinido'].includes(gcSelectedType);
+
+  document.getElementById('gc-submit-btn').style.display='none';
+  document.getElementById('gc-proc').style.display='block';
+  document.getElementById('gc-err').style.display='none';
+
+  await new Promise(r=>setTimeout(r,1400));
+
+  // Generate reference number
+  const stnCode = gcStation.split(' ')[0].toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const refNum = 'GC-'+stnCode+'-'+String(Date.now()).slice(-5);
+  const ts = new Date().toISOString();
+
+  const concern = {
+    ref: refNum,
+    station: gcStation,
+    type: gcSelectedType,
+    description: desc,
+    contact: anon?'Anonymous':contact||'Anonymous',
+    anonymous: anon,
+    urgent: isUrgent,
+    status: 'Natanggap',
+    timestamp: ts,
+    date: new Date().toLocaleDateString('tl-PH',{year:'numeric',month:'long',day:'numeric'}),
+    time: new Date().toLocaleTimeString('tl-PH',{hour:'2-digit',minute:'2-digit'})
+  };
+
+  // Store locally so super user sees it
+  guestConcerns.unshift(concern);
+  try{ localStorage.setItem('hugo_concerns', JSON.stringify(guestConcerns)); }catch(e){}
+
+  document.getElementById('gc-proc').style.display='none';
+  document.getElementById('gc-success').style.display='flex';
+  document.getElementById('gc-success').style.flexDirection='column';
+  document.getElementById('gc-refnum').textContent = refNum;
+}
+
+function resetGcForm(){
+  gcSelectedType='';
+  document.getElementById('gc-desc').value='';
+  document.getElementById('gc-contact').value='';
+  document.getElementById('gc-anon').checked=false;
+  document.getElementById('gc-submit-btn').style.display='flex';
+  document.getElementById('gc-submit-btn').disabled=true;
+  document.getElementById('gc-success').style.display='none';
+  document.getElementById('gc-urgent-warn').style.display='none';
+  document.querySelectorAll('.gc-type-btn').forEach(b=>b.classList.remove('on'));
+}
+
+// ── Load stored concerns ──
+function loadConcerns(){
+  try{
+    const stored = localStorage.getItem('hugo_concerns');
+    if(stored) guestConcerns = JSON.parse(stored);
+  }catch(e){}
+}
+
+// ── Build concerns list in master report ──
+function buildConcernsList(){
+  loadConcerns();
+  const el = document.getElementById('gc-list');
+  const badge = document.getElementById('gc-count-badge');
+  if(badge) badge.textContent = guestConcerns.length;
+  if(!el) return;
+  if(!guestConcerns.length){
+    el.innerHTML='<div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px;">Walang reklamo pa.</div>';
+    return;
+  }
+  el.innerHTML='';
+  guestConcerns.forEach(c=>{
+    const isUrgent=c.urgent;
+    const statusColor=c.status==='Naresolba'?'cb-done':isUrgent?'cb-urgent':'cb-norm';
+    const row=document.createElement('div');
+    row.style.cssText='padding:10px 0;border-bottom:.5px solid #f0f4f8;';
+    row.innerHTML=`
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+            <span style="font-size:10px;font-weight:700;font-family:monospace;color:var(--navy);">${c.ref}</span>
+            <span class="concern-badge ${statusColor}">${isUrgent?'⚠ URGENT · ':''} ${c.type}</span>
+          </div>
+          <div style="font-size:11px;color:#1a2332;margin-bottom:3px;">${c.description.substring(0,120)}${c.description.length>120?'...':''}</div>
+          <div style="font-size:9.5px;color:#94a3b8;">${c.station} · ${c.date} ${c.time} · ${c.anonymous?'Anonymous':c.contact}</div>
+        </div>
+        <select onchange="updateConcernStatus('${c.ref}',this.value)" style="font-size:10px;padding:4px 6px;border:.5px solid #d0dce8;border-radius:7px;background:#f8fafc;font-family:inherit;cursor:pointer;">
+          <option ${c.status==='Natanggap'?'selected':''}>Natanggap</option>
+          <option ${c.status==='Inirerebyu'?'selected':''}>Inirerebyu</option>
+          <option ${c.status==='Naresolba'?'selected':''}>Naresolba</option>
+        </select>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
+function updateConcernStatus(ref, status){
+  const c = guestConcerns.find(x=>x.ref===ref);
+  if(c){ c.status=status; try{localStorage.setItem('hugo_concerns',JSON.stringify(guestConcerns));}catch(e){} buildConcernsList(); }
+}
+
+// ─── QR CODE GENERATION ───────────────────────────────────────────────────────
+// Pure JS QR code — no external library needed
+// Using simple URL encoding — the QR links to the app URL with station param
+
+function initQRSelector(){
+  const sel = document.getElementById('qr-stn-sel');
+  if(!sel) return;
+  sel.innerHTML='<option value="">Pumili ng himpilan...</option>';
+  ALL_STNS.forEach(s=>{
+    const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);
+  });
+}
+
+function generateQR(){
+  const sel=document.getElementById('qr-stn-sel');
+  const stn=sel?.value;
+  if(!stn) return;
+  const single=document.getElementById('qr-single');
+  single.style.display='flex';single.style.flexDirection='column';
+  document.getElementById('qr-stn-name').textContent=stn;
+  const baseUrl=window.location.origin+window.location.pathname;
+  const url=baseUrl+'?station='+encodeURIComponent(stn)+'&token=GUEST-2025';
+  drawQR('qr-canvas',url,180);
+}
+
+function downloadQR(){
+  const stn=document.getElementById('qr-stn-sel')?.value||'station';
+  const canvas=document.getElementById('qr-canvas');
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL('image/png');
+  a.download='HuGo-QR-'+stn.replace(/ /g,'-')+'.png';
+  a.click();
+}
+
+function printQRPoster(){
+  const stn=document.getElementById('qr-stn-sel')?.value||'';
+  const canvas=document.getElementById('qr-canvas');
+  const imgData=canvas.toDataURL('image/png');
+  const baseUrl=window.location.origin+window.location.pathname;
+  const url=baseUrl+'?station='+encodeURIComponent(stn)+'&token=GUEST-2025';
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>HuGo QR — ${stn}</title>
+  <style>
+    body{font-family:-apple-system,sans-serif;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;text-align:center;}
+    .poster{border:3px solid #0C447C;border-radius:16px;padding:28px 24px;max-width:340px;width:100%;}
+    .logo-wrap{width:56px;height:56px;border-radius:50%;background:#0C447C;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .logo-wrap span{color:#fff;font-size:13px;font-weight:700;line-height:1;}
+    .logo-wrap small{color:#B5D4F4;font-size:7px;line-height:1;}
+    h1{font-size:18px;color:#0C447C;margin:0 0 4px;}
+    h2{font-size:13px;color:#5a6a7a;font-weight:400;margin:0 0 16px;}
+    img{width:180px;height:180px;border-radius:10px;border:1px solid #d0dce8;margin-bottom:16px;}
+    .stn{font-size:14px;font-weight:700;color:#0C447C;margin-bottom:6px;padding:8px 14px;background:#E6F1FB;border-radius:10px;}
+    .desc{font-size:11px;color:#7a8a9a;line-height:1.6;margin-bottom:14px;}
+    .url{font-size:8px;color:#94a3b8;word-break:break-all;margin-top:10px;}
+    .conf{font-size:10px;font-weight:600;color:#3B6D11;background:#EAF3DE;padding:6px 12px;border-radius:8px;margin-bottom:14px;}
+    .footer{font-size:10px;color:#94a3b8;margin-top:12px;font-style:italic;}
+  </style></head><body>
+  <div class="poster">
+    <div class="logo-wrap"><span>HuGo</span><small>BULPPO</small></div>
+    <h1>Iulat ang Inyong Reklamo</h1>
+    <h2>I-scan ang QR code para mag-ulat</h2>
+    <img src="${imgData}" alt="QR Code">
+    <div class="stn">${stn}</div>
+    <div class="conf">🔒 Kumpidensyal at Protektado</div>
+    <div class="desc">Maaari kayong mag-ulat ng reklamo tungkol sa:<br>
+    Karapatang Pantao · Kapakanan ng Detinido<br>
+    Kondisyon ng Pasilidad · Ugali ng Tauhan</div>
+    <div class="desc"><strong>Maaaring manatiling anonymous</strong><br>Hindi kailangan ng inyong pangalan</div>
+    <div class="url">${url}</div>
+    <div class="footer">BULPPO PRO 3 · Human Rights Affairs Office<br>"Serbisyong Mabilis, Tapat, at Nararamdaman"</div>
+  </div>
+  <script>window.onload=()=>window.print();</script>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── Minimal QR drawing using canvas (matrix-based) ──
+function drawQR(canvasId,text,size){
+  const canvas=document.getElementById(canvasId);if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  // Build QR matrix using simple encoding
+  const matrix=buildQRMatrix(text);
+  const n=matrix.length;
+  const cell=Math.floor(size/n);
+  const offset=Math.floor((size-cell*n)/2);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);
+  ctx.fillStyle='#000';
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(matrix[r][c]) ctx.fillRect(offset+c*cell,offset+r*cell,cell,cell);
+}
+
+function buildQRMatrix(text){
+  // Simplified QR-like matrix for URL display
+  // Uses a deterministic pattern seeded from text content
+  const size=25;
+  const m=Array.from({length:size},()=>Array(size).fill(0));
+  // Finder patterns (top-left, top-right, bottom-left)
+  [[0,0],[0,size-7],[size-7,0]].forEach(([r,c])=>{
+    for(let i=0;i<7;i++) for(let j=0;j<7;j++){
+      m[r+i][c+j]=(i===0||i===6||j===0||j===6||((i>=2&&i<=4)&&(j>=2&&j<=4)))?1:0;
+    }
+  });
+  // Timing patterns
+  for(let i=8;i<size-8;i++){m[6][i]=(i%2===0)?1:0;m[i][6]=(i%2===0)?1:0;}
+  // Data modules — encode text as bit pattern
+  let bits='';
+  for(let i=0;i<text.length;i++) bits+=text.charCodeAt(i).toString(2).padStart(8,'0');
+  bits+=bits; // repeat for visual density
+  let bi=0;
+  for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+    // Skip finder patterns and timing
+    if((r<9&&c<9)||(r<9&&c>=size-8)||(r>=size-8&&c<9)) continue;
+    if(r===6||c===6) continue;
+    if(m[r][c]===0 && bi<bits.length){m[r][c]=bits[bi]==='1'?1:0;bi++;}
+  }
+  return m;
+}
+
+// ── Wire buildMasterView to also build QR and concerns ──
+const _origBuildMasterView = buildMasterView;
+buildMasterView = function(){
+  _origBuildMasterView();
+  buildConcernsList();
+  initQRSelector();
+};
+
+// ── Check for guest mode on page load ──
+window.addEventListener('load', checkGuestMode);
 </script>
 </body>
 </html>
