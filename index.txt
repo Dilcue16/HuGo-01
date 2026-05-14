@@ -275,6 +275,11 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 #checklist-overlay{position:fixed;inset:0;background:rgba(4,44,83,.6);z-index:999;display:none;flex-direction:column;justify-content:flex-end;backdrop-filter:blur(2px);}
 .cap-thumb.captured{border-color:var(--blue);}
 .cap-thumb.captured .cap-thumb-label{background:rgba(24,95,165,.85);}
+/* SESSION TIMEOUT */
+#session-warn{position:fixed;top:0;left:0;right:0;z-index:8888;background:#A32D2D;color:#fff;padding:10px 14px;display:none;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+#session-warn i{font-size:18px;flex-shrink:0;}
+#session-warn-msg{flex:1;font-size:12px;font-weight:600;}
+#session-warn-btn{padding:6px 14px;background:#fff;color:#A32D2D;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -311,7 +316,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
       </div>
     </div>
     <div class="alert info"><i class="ti ti-shield"></i>All data is strictly isolated per station. Access control enforced across all modules.</div>
-    <div class="alert info" style="font-size:11px;"><i class="ti ti-info-circle"></i>Demo — Station passcode: <strong>PHRA2025</strong> · Super user: <strong>HUGO@ADMIN2025</strong></div>
+    <div class="alert info" style="font-size:11px;"><i class="ti ti-info-circle"></i>Super user: <strong>HUGO@ADMIN2025</strong> · Contact your PHRA officer for your station passcode.</div>
   </div>
 
   <!-- STATION AUTH -->
@@ -328,7 +333,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
         <input type="password" class="tok-inp" id="stn-pass" placeholder="Enter passcode..." oninput="onPassIn()">
       </div>
       <div class="alert err" id="stn-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="stn-err-msg"></span></div>
-      <div class="alert info" style="font-size:11px;margin-top:4px;"><i class="ti ti-info-circle"></i>Demo passcode: <strong>PHRA2025</strong></div>
+      <div class="alert info" style="font-size:11px;margin-top:4px;"><i class="ti ti-info-circle"></i>Contact your PHRA officer for your station passcode.</div>
     </div>
     <button class="pbtn" id="stn-btn" onclick="loginStation()" disabled><i class="ti ti-login"></i>Login</button>
     <div class="processing" id="stn-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
@@ -576,6 +581,13 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
     <!-- CHECKLIST OVERLAY -->
     <div id="checklist-overlay"></div>
 
+    <!-- SESSION TIMEOUT WARNING -->
+    <div id="session-warn">
+      <i class="ti ti-clock-exclamation"></i>
+      <span id="session-warn-msg">Session expiring in 2:00 — tap to stay logged in</span>
+      <button id="session-warn-btn" onclick="resetSessionTimer()">Stay logged in</button>
+    </div>
+
   </div><!-- /auth-app -->
 </div><!-- /app -->
 
@@ -585,7 +597,35 @@ const ALL_STNS=['1ST PMFC','2ND PMFC','ANGAT MPS','BALAGTAS MPS','BALIWAG CPS','
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const CASE_DESC=['Murder','Homicide','Rape','Robbery','Illegal Drugs (RA 9165)','Illegal Possession of Firearms','Physical Injury','VAWC','Other'];
 const VALID_TOKS=['HUGO-INSPECT-01','PHRA-CAM-2025','BULPPO-SU-99'];
-const STATION_PC={};ALL_STNS.forEach(s=>STATION_PC[s]='PHRA2025');
+const STATION_PC={
+  '1ST PMFC':'1PMFC-2025',
+  '2ND PMFC':'2PMFC-2025',
+  'ANGAT MPS':'ANGAT-2025',
+  'BALAGTAS MPS':'BALAGTAS-2025',
+  'BALIWAG CPS':'BALIWAG-2025',
+  'BOCAUE MPS':'BOCAUE-2025',
+  'BULAKAN MPS':'BULAKAN-2025',
+  'BUSTOS MPS':'BUSTOS-2025',
+  'CALUMPIT MPS':'CALUMPIT-2025',
+  'DRT MPS':'DRT-2025',
+  'GUIGUINTO MPS':'GUIGUINTO-2025',
+  'HAGONOY MPS':'HAGONOY-2025',
+  'MALOLOS CPS':'MALOLOS-2025',
+  'MARILAO MPS':'MARILAO-2025',
+  'MEYCAUAYAN CPS':'MEYCAUAYAN-2025',
+  'NORZAGARAY MPS':'NORZAGARAY-2025',
+  'OBANDO MPS':'OBANDO-2025',
+  'PANDI MPS':'PANDI-2025',
+  'PAOMBONG MPS':'PAOMBONG-2025',
+  'PLARIDEL MPS':'PLARIDEL-2025',
+  'PULILAN MPS':'PULILAN-2025',
+  'SAN ILDEFONSO MPS':'SANILDEFONSO-2025',
+  'SAN MIGUEL MPS':'SANMIGUEL-2025',
+  'SAN RAFAEL MPS':'SANRAFAEL-2025',
+  'SANTA MARIA MPS':'SANTAMARIA-2025',
+  'SJDM CPS':'SJDM-2025',
+  'PHQ':'PHQ-2025'
+};
 const SUPER_PW='HUGO@ADMIN2025';
 
 // ─── INSPECTION CONDITIONS ───────────────────────────────────────────────────
@@ -723,9 +763,11 @@ function launchApp(){
   }
   buildMonthGrids();buildHomeStats();
   checkAccess(role==='super'?'ALL_STATIONS':myStation,'login',role==='super'?'SYSTEM':'STATION');
+  startSessionTimer();
   goNav('home');
 }
 function logout(){
+  clearSessionTimer();
   role='';if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
   document.getElementById('auth-app').style.display='none';
   document.getElementById('login-screen').style.display='flex';document.getElementById('login-screen').style.flexDirection='column';
@@ -1416,6 +1458,90 @@ function resetCam(){
   closeChecklist();
   camSid='';camTok='';
 }
+
+// ─── SESSION TIMEOUT ─────────────────────────────────────────────────────────
+const SESSION_TIMEOUT_STATION = 15 * 60 * 1000; // 15 min
+const SESSION_TIMEOUT_SUPER   = 30 * 60 * 1000; // 30 min
+const SESSION_WARN_BEFORE     =  2 * 60 * 1000; //  2 min warning
+
+let sessionTimer     = null;
+let sessionWarnTimer = null;
+let sessionCountdown = null;
+let sessionExpireAt  = 0;
+
+function startSessionTimer(){
+  clearSessionTimer();
+  const timeout = role==='super' ? SESSION_TIMEOUT_SUPER : SESSION_TIMEOUT_STATION;
+  sessionExpireAt = Date.now() + timeout;
+
+  // Warning fires 2 min before expiry
+  sessionWarnTimer = setTimeout(()=>{
+    document.getElementById('session-warn').style.display='flex';
+    let secs = Math.floor(SESSION_WARN_BEFORE/1000);
+    updateWarnMsg(secs);
+    sessionCountdown = setInterval(()=>{
+      secs--;
+      if(secs<=0){ clearInterval(sessionCountdown); sessionExpire(); return; }
+      updateWarnMsg(secs);
+    },1000);
+  }, timeout - SESSION_WARN_BEFORE);
+
+  // Hard logout at timeout
+  sessionTimer = setTimeout(()=>sessionExpire(), timeout);
+}
+
+function updateWarnMsg(secs){
+  const m = Math.floor(secs/60), s = String(secs%60).padStart(2,'0');
+  const el = document.getElementById('session-warn-msg');
+  if(el) el.textContent = 'Session expiring in '+m+':'+s+' — tap to stay logged in';
+}
+
+function resetSessionTimer(){
+  document.getElementById('session-warn').style.display='none';
+  clearInterval(sessionCountdown);
+  startSessionTimer();
+}
+
+function clearSessionTimer(){
+  clearTimeout(sessionTimer);
+  clearTimeout(sessionWarnTimer);
+  clearInterval(sessionCountdown);
+  sessionTimer=null;sessionWarnTimer=null;sessionCountdown=null;
+  const warn=document.getElementById('session-warn');
+  if(warn) warn.style.display='none';
+}
+
+function sessionExpire(){
+  clearSessionTimer();
+  const who = role==='super'?'Super user ('+userId+')':'Station user ('+myStation+')';
+  auditLog.unshift({ts:new Date().toISOString(),user_id:userId,role,
+    module:'SYSTEM',action:'SESSION_TIMEOUT',access_granted:false,
+    note:'Auto-logout after '+(role==='super'?'30':'15')+' min inactivity'});
+  alert('Your session has expired due to inactivity.
+
+'+who+' has been logged out.');
+  logout();
+}
+
+// Reset timer on any user interaction
+['touchstart','mousedown','keydown','scroll'].forEach(ev=>{
+  document.addEventListener(ev, ()=>{
+    if(role && document.getElementById('session-warn').style.display==='flex'){
+      resetSessionTimer();
+    } else if(role){
+      // Silent reset — only restart timers, no UI change
+      clearTimeout(sessionTimer);clearTimeout(sessionWarnTimer);clearInterval(sessionCountdown);
+      const timeout=role==='super'?SESSION_TIMEOUT_SUPER:SESSION_TIMEOUT_STATION;
+      sessionExpireAt=Date.now()+timeout;
+      sessionWarnTimer=setTimeout(()=>{
+        document.getElementById('session-warn').style.display='flex';
+        let secs=Math.floor(SESSION_WARN_BEFORE/1000);updateWarnMsg(secs);
+        sessionCountdown=setInterval(()=>{secs--;if(secs<=0){clearInterval(sessionCountdown);sessionExpire();return;}updateWarnMsg(secs);},1000);
+      },timeout-SESSION_WARN_BEFORE);
+      sessionTimer=setTimeout(()=>sessionExpire(),timeout);
+    }
+  },{passive:true});
+});
 
 // ─── MASTER REPORT ────────────────────────────────────────────────────────────
 function buildMasterView(){
