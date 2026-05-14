@@ -370,7 +370,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
           <div class="mod-card" onclick="goNav('med')"><div class="mc-ico"><i class="ti ti-stethoscope"></i></div><div class="mc-name">Monthly Medical</div><div class="mc-desc">Medical check-up report</div><div class="mc-badge mb-g">Ready</div></div>
           <div class="mod-card" onclick="goNav('phros')"><div class="mc-ico"><i class="ti ti-users"></i></div><div class="mc-name">PHROs &amp; COs</div><div class="mc-desc">Excel file submission</div><div class="mc-badge mb-g">Ready</div></div>
           <div class="mod-card" onclick="goNav('idd')"><div class="mc-ico"><i class="ti ti-file-description"></i></div><div class="mc-name">Monthly IDD</div><div class="mc-desc">Disease &amp; death report</div><div class="mc-badge mb-g" id="idd-home-badge">Ready</div></div>
-          <div class="mod-card" onclick="goNav('cam')"><div class="mc-ico"><i class="ti ti-camera"></i></div><div class="mc-name">Inspection Cam</div><div class="mc-desc">Manual inspection tool</div><div class="mc-badge mb-b">Token req'd</div></div>
+          <div class="mod-card" id="cam-home-card" onclick="goNav('cam')"><div class="mc-ico"><i class="ti ti-camera"></i></div><div class="mc-name">Inspection Cam</div><div class="mc-desc" id="cam-home-desc">Activate camera</div><div class="mc-badge mb-b" id="cam-home-badge">Token req'd</div></div>
           <div class="mod-card" onclick="goNav('master')"><div class="mc-ico"><i class="ti ti-file-certificate"></i></div><div class="mc-name">Master report</div><div class="mc-desc">Consolidated reports</div><div class="mc-badge mb-b" id="mc-master-badge">Super user only</div></div>
         </div>
         <div class="sec-lbl">Recent activity</div>
@@ -481,7 +481,10 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
         <div id="cam-tok-sec">
           <div class="card">
             <div class="card-title"><i class="ti ti-lock"></i>Inspection token</div>
-            <div class="alert ok" style="margin-bottom:10px;"><i class="ti ti-clipboard-list"></i><div><strong>Guided Checklist Inspection</strong><br><span style="font-size:10.5px;">Tap <strong>Inspect</strong> on each condition · Answer YES/NO checklist while physically checking · Photo captured automatically · Works offline · No API needed</span></div></div>
+            <!-- Station user view -->
+            <div id="cam-info-station" class="alert info" style="margin-bottom:10px;display:none;"><i class="ti ti-camera"></i><div><strong>Activate Camera</strong><br><span style="font-size:10.5px;">As a station user, you can activate the camera. The super user will conduct the checklist inspection using the live feed.</span></div></div>
+            <!-- Super user view -->
+            <div id="cam-info-super" class="alert ok" style="margin-bottom:10px;display:none;"><i class="ti ti-clipboard-list"></i><div><strong>Guided Checklist Inspection</strong><br><span style="font-size:10.5px;">Tap <strong>Inspect</strong> on each condition · Answer YES/NO checklist · Photo captured automatically · Works offline</span></div></div>
             <div class="fg" style="margin-bottom:10px;"><div class="fl">Enter inspection token</div><input type="text" class="tok-inp" id="cam-tok" placeholder="Enter token..." maxlength="20" oninput="onCamTok()"></div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
               <span style="padding:3px 9px;border-radius:9px;font-size:10px;font-family:monospace;background:#f0f4f8;border:.5px solid #d0dce8;cursor:pointer;color:#5a6a7a;" onclick="setCamTok('HUGO-INSPECT-01')">HUGO-INSPECT-01</span>
@@ -490,7 +493,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
             </div>
             <div class="alert err" id="cam-tok-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="cam-tok-err-msg"></span></div>
           </div>
-          <button class="pbtn" id="cam-val-btn" onclick="valCam()" disabled style="margin-top:4px;"><i class="ti ti-camera"></i>Validate &amp; start inspection</button>
+          <button class="pbtn" id="cam-val-btn" onclick="valCam()" disabled style="margin-top:4px;"><i class="ti ti-camera"></i><span id="cam-val-txt">Validate &amp; activate camera</span></button>
         </div>
         <div id="cam-live-sec" style="display:none;flex-direction:column;gap:10px;">
           <div id="cam-vp">
@@ -499,18 +502,27 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
             <div class="scan-overlay"><div class="scan-corner sc-tl"></div><div class="scan-corner sc-tr"></div><div class="scan-corner sc-bl"></div><div class="scan-corner sc-br"></div></div>
             <div id="cam-sid"></div>
             <div id="cam-live-ind"><div class="ld"></div>LIVE</div>
-            <div id="cam-status-bar"><span id="cam-status-txt" style="flex:1;">Manual inspection active</span></div>
+            <div id="cam-status-bar"><span id="cam-status-txt" style="flex:1;">Camera active</span></div>
             <div id="cap-flash"></div>
           </div>
-          <div style="display:flex;gap:8px;">
-            <button class="dbtn" onclick="stopCam()" style="flex:1;"><i class="ti ti-player-stop"></i>Generate report</button>
-            <button class="gbtn" onclick="manualCapture()"><i class="ti ti-camera"></i>Photo</button>
+
+          <!-- STATION USER: camera-only view -->
+          <div id="station-cam-view" style="display:none;">
+            <div class="alert info"><i class="ti ti-camera"></i><div><strong>Camera is active</strong><br><span style="font-size:10.5px;">Point the camera at each item during inspection. The super user will conduct the checklist inspection remotely or on-site.</span></div></div>
           </div>
-          <div class="sec-lbl">Inspection conditions — tap PASS or FAIL</div>
-          <div class="ai-cond-grid" id="ai-conds"></div>
-          <div class="sec-lbl">Captured photos <span class="stn-pill sp-b" id="cap-count" style="margin-left:4px;">0</span></div>
-          <div id="cap-strip"></div>
-          <div class="card"><div class="card-title"><i class="ti ti-activity"></i>Inspection log</div><div id="det-log" style="display:flex;flex-direction:column;gap:4px;max-height:140px;overflow-y:auto;"><div style="font-size:11px;color:#94a3b8;">Physically check each item · Tap PASS or FAIL</div></div></div>
+
+          <!-- SUPER USER: full inspection controls -->
+          <div id="super-cam-view" style="display:none;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:8px;">
+              <button class="dbtn" onclick="stopCam()" style="flex:1;"><i class="ti ti-player-stop"></i>Generate report</button>
+              <button class="gbtn" onclick="manualCapture()"><i class="ti ti-camera"></i>Photo</button>
+            </div>
+            <div class="sec-lbl">Inspection conditions — tap Inspect</div>
+            <div class="ai-cond-grid" id="ai-conds"></div>
+            <div class="sec-lbl">Captured photos <span class="stn-pill sp-b" id="cap-count" style="margin-left:4px;">0</span></div>
+            <div id="cap-strip"></div>
+            <div class="card"><div class="card-title"><i class="ti ti-activity"></i>Inspection log</div><div id="det-log" style="display:flex;flex-direction:column;gap:4px;max-height:140px;overflow-y:auto;"><div style="font-size:11px;color:#94a3b8;">Tap Inspect on each condition to begin</div></div></div>
+          </div>
         </div>
         <div id="cam-done-sec" style="display:none;flex-direction:column;gap:10px;">
           <div class="card">
@@ -690,7 +702,25 @@ function launchApp(){
   document.getElementById('home-greeting').textContent='Magandang araw'+(myStation?', '+myStation.split(' ')[0]:'')+'!';
   document.getElementById('home-sub').textContent=role==='super'?'Super user — full access':'Station user — '+myStation;
   ['pice','med','phros','idd'].forEach(m=>{const el=document.getElementById(m+'-stn');if(el) el.textContent=role==='station'?myStation:'All stations';});
-  if(role==='super'){document.getElementById('mc-master-badge').textContent='Ready';document.getElementById('mc-master-badge').className='mc-badge mb-g';}
+  if(role==='super'){
+    document.getElementById('mc-master-badge').textContent='Ready';
+    document.getElementById('mc-master-badge').className='mc-badge mb-g';
+    // Super user camera info
+    const infoSu=document.getElementById('cam-info-super');if(infoSu) infoSu.style.display='flex';
+    const infoSt=document.getElementById('cam-info-station');if(infoSt) infoSt.style.display='none';
+    const camTxt=document.getElementById('cam-val-txt');if(camTxt) camTxt.innerHTML='Validate &amp; start inspection';
+    // Home card
+    const camDesc=document.getElementById('cam-home-desc');if(camDesc) camDesc.textContent='Guided checklist inspection';
+    const camBadge=document.getElementById('cam-home-badge');if(camBadge){camBadge.textContent='Full access';camBadge.className='mc-badge mb-g';}
+  } else {
+    // Station user camera info
+    const infoSt=document.getElementById('cam-info-station');if(infoSt) infoSt.style.display='flex';
+    const infoSu=document.getElementById('cam-info-super');if(infoSu) infoSu.style.display='none';
+    const camTxt=document.getElementById('cam-val-txt');if(camTxt) camTxt.innerHTML='Validate &amp; activate camera';
+    // Home card
+    const camDesc=document.getElementById('cam-home-desc');if(camDesc) camDesc.textContent='Activate camera only';
+    const camBadge=document.getElementById('cam-home-badge');if(camBadge){camBadge.textContent='Camera only';camBadge.className='mc-badge mb-b';}
+  }
   buildMonthGrids();buildHomeStats();
   checkAccess(role==='super'?'ALL_STATIONS':myStation,'login',role==='super'?'SYSTEM':'STATION');
   goNav('home');
@@ -979,8 +1009,19 @@ async function valCam(){
     document.getElementById('cam-live-ind').style.display='flex';
     document.getElementById('cam-status-bar').style.display='flex';
     document.getElementById('cam-status-txt').textContent='Tap Inspect on each condition';
-    buildConditionCards();
-    addDetLog('START','Guided checklist inspection active · 6 conditions · No API needed','info');
+    // Show role-based camera view
+    if(role==='super'){
+      document.getElementById('super-cam-view').style.display='flex';
+      document.getElementById('super-cam-view').style.flexDirection='column';
+      document.getElementById('station-cam-view').style.display='none';
+      buildConditionCards();
+      addDetLog('START','Super user — guided checklist inspection active · 6 conditions','info');
+    } else {
+      document.getElementById('station-cam-view').style.display='block';
+      document.getElementById('super-cam-view').style.display='none';
+      document.getElementById('cam-status-txt').textContent='Camera active — super user will conduct inspection';
+      addDetLog('START','Station user — camera active · awaiting super user inspection','info');
+    }
   }catch(e){
     document.getElementById('cam-tok-err-msg').textContent='Camera access failed: '+e.message;
     document.getElementById('cam-tok-err').style.display='flex';document.getElementById('cam-val-btn').disabled=false;
@@ -1269,6 +1310,16 @@ function addDetLog(level,msg,type){
 }
 
 function stopCam(){
+  // Only super users can generate the report
+  if(role!=='super'){
+    if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+    document.getElementById('cam-live-ind').style.display='none';
+    document.getElementById('cam-live-sec').style.display='none';
+    document.getElementById('station-cam-view').style.display='none';
+    document.getElementById('cam-tok-sec').style.display='block';
+    addDetLog('INFO','Camera stopped by station user','info');
+    return;
+  }
   if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
   closeChecklist();
   document.getElementById('cam-live-ind').style.display='none';
@@ -1352,14 +1403,16 @@ function copyCamJSON(){
 }
 
 function resetCam(){
-  conditionResults={};capturedImages={};checklistAnswers={};
-  capturedImages=[];
+  conditionResults={};capturedImages=[];checklistAnswers={};
   document.getElementById('cam-done-sec').style.display='none';
   document.getElementById('cam-tok-sec').style.display='block';
   document.getElementById('cam-tok').value='';document.getElementById('cam-val-btn').disabled=true;
   document.getElementById('cam-tok-err').style.display='none';
-  document.getElementById('cap-strip').innerHTML='';document.getElementById('cap-count').textContent='0';
+  const strip=document.getElementById('cap-strip');if(strip) strip.innerHTML='';
+  const cnt=document.getElementById('cap-count');if(cnt) cnt.textContent='0';
   document.getElementById('flagged-section').style.display='none';
+  document.getElementById('station-cam-view').style.display='none';
+  document.getElementById('super-cam-view').style.display='none';
   closeChecklist();
   camSid='';camTok='';
 }
