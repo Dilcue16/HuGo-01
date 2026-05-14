@@ -318,6 +318,22 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 #session-warn-msg{flex:1;font-size:12px;font-weight:600;}
 #session-warn-btn{padding:6px 14px;background:#fff;color:#A32D2D;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
 </style>
+<script>
+// Kill splash immediately — runs before anything else
+(function(){
+  function go(){
+    var s=document.getElementById('splash');
+    if(s){s.style.display='none';s.style.opacity='0';}
+  }
+  // Try at multiple points
+  setTimeout(go,1000);
+  setTimeout(go,2000);
+  setTimeout(go,3000);
+  if(document.readyState!=='loading') setTimeout(go,500);
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(go,800);});
+  window.addEventListener('load',function(){setTimeout(go,500);});
+})();
+</script>
 </head>
 <body>
 <!-- SPLASH -->
@@ -796,18 +812,11 @@ window.addEventListener('load',function(){setTimeout(dismissSplash,800);});
 // ─── ONLINE/OFFLINE ───────────────────────────────────────────────────────────
 window.addEventListener('online',()=>document.getElementById('offline-bar').style.display='none');
 window.addEventListener('offline',()=>document.getElementById('offline-bar').style.display='block');
-// Unregister old service workers, register new v2.0
+// Unregister ALL service workers to clear stale cache
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    // First unregister ALL old SWs to clear stale cache
-    navigator.serviceWorker.getRegistrations().then(regs=>{
-      regs.forEach(reg=>{
-        if(!reg.scope.includes('hugo-pwa-v2')) reg.unregister();
-      });
-    }).catch(()=>{});
-    // Register new SW
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    regs.forEach(reg=>reg.unregister());
+  }).catch(()=>{});
 }
 
 // ─── ACCESS CONTROL ───────────────────────────────────────────────────────────
