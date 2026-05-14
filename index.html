@@ -653,10 +653,10 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
       <button class="bnav" id="nav-master" onclick="goNav('master')"><i class="ti ti-file-certificate"></i><span>Master</span></button>
     </div>
     <!-- CHECKLIST OVERLAY -->
-    <div id="checklist-overlay"></div>
+    <div id="checklist-overlay" style="display:none;"></div>
 
     <!-- SESSION TIMEOUT WARNING -->
-    <div id="session-warn">
+    <div id="session-warn" style="display:none;">
       <i class="ti ti-clock-exclamation"></i>
       <span id="session-warn-msg">Session expiring in 2:00 — tap to stay logged in</span>
       <button id="session-warn-btn" onclick="resetSessionTimer()">Stay logged in</button>
@@ -665,7 +665,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   </div><!-- /auth-app -->
 
   <!-- GUEST CONCERN FORM — public, no login needed -->
-  <div id="guest-screen">
+  <div id="guest-screen" style="display:none;">
     <div class="gc-hdr">
       <div class="gc-hdr-logo"><span class="lm">HuGo</span><span class="ls">BULPPO</span></div>
       <h1>Iulat ang Inyong Reklamo</h1>
