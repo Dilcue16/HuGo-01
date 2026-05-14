@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0C447C">
 <title>HuGo — Human Rights on the Go</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
@@ -328,6 +329,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="mod-card" onclick="goMod('med')"><div class="mc-ico"><i class="ti ti-stethoscope"></i></div><div class="mc-name">Monthly Medical</div><div class="mc-desc">Medical check-up report</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" onclick="goMod('phros')"><div class="mc-ico"><i class="ti ti-users"></i></div><div class="mc-name">PHROs &amp; COs</div><div class="mc-desc">Excel file submission</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" onclick="goMod('idd')"><div class="mc-ico"><i class="ti ti-file-description"></i></div><div class="mc-name">Monthly IDD</div><div class="mc-desc">Disease &amp; death report</div><div class="mc-badge mb-g" id="idd-hbadge">Ready</div></div>
+    <div class="mod-card" onclick="goMod('pupc')"><div class="mc-ico"><i class="ti ti-users-group"></i></div><div class="mc-name">PUPC Weekly</div><div class="mc-desc">Persons Under PN Custody</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" onclick="goMod('cam')"><div class="mc-ico"><i class="ti ti-camera"></i></div><div class="mc-name">Inspection Cam</div><div class="mc-desc" id="cam-home-desc">Manual inspection</div><div class="mc-badge mb-b" id="cam-home-badge">Token req'd</div></div>
     <div class="mod-card" id="master-mod-card" onclick="goMod('master')"><div class="mc-ico"><i class="ti ti-file-certificate"></i></div><div class="mc-name">Master Report</div><div class="mc-desc">Consolidated reports</div><div class="mc-badge mb-b" id="master-home-badge">Super user only</div></div>
   </div>
@@ -389,6 +391,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="drop-zone" onclick="document.getElementById('phros-fi').click()"><i class="ti ti-file-spreadsheet"></i><p>Tap to upload Excel file</p></div>
       <div id="phros-prev"></div>
       <input type="file" id="phros-fi" accept=".xlsx" style="display:none" onchange="handleXlsx(this.files)"></div>
+
   </div>
   <button class="pbtn" id="phros-btn" onclick="submitMod('phros')" disabled><i class="ti ti-send"></i>Submit PHROs &amp; COs</button>
   <div class="proc" id="phros-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
@@ -422,6 +425,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <button class="pbtn" id="idd-btn" onclick="submitMod('idd')" disabled><i class="ti ti-send"></i>Submit IDD Report</button>
   <div class="proc" id="idd-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
   <div id="idd-done"></div>
+</div>
+
+<!-- PUPC WEEKLY REPORT -->
+<div class="screen" id="scr-pupc">
+  <div style="display:flex;align-items:center;gap:10px;"><button class="gbtn" onclick="goMod('home')" style="padding:8px;"><i class="ti ti-arrow-left"></i></button><span style="font-size:15px;font-weight:700;color:#1a2332;">PUPC Weekly Report</span></div>
+  <div class="alert info"><i class="ti ti-users-group"></i><div><strong>Weekly List of Persons Under PN Custody</strong><br><span style="font-size:10.5px;">Upload your station's weekly Excel report. Data will appear in the Master Report consolidated table.</span></div></div>
+  <div class="card">
+    <div class="fg"><div class="fl">Station</div><div id="pupc-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="fg"><div class="fl">Week <span class="req">*</span></div>
+        <select class="fs" id="pupc-week" onchange="chkPupc()"><option value="">Week...</option><option>Week 1</option><option>Week 2</option><option>Week 3</option><option>Week 4</option></select></div>
+      <div class="fg"><div class="fl">Month <span class="req">*</span></div>
+        <select class="fs" id="pupc-month" onchange="chkPupc()"><option value="">Month...</option><option>January</option><option>February</option><option>March</option><option>April</option><option selected>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+    </div>
+    <div class="fg"><div class="fl">Upload Excel (.xlsx) <span class="req">*</span><span style="font-size:9px;color:#94a3b8;margin-left:4px;">WEEKLY LIST OF PERSONS UNDER PN format</span></div>
+      <div class="drop-zone" onclick="document.getElementById('pupc-fi').click()"><i class="ti ti-file-spreadsheet"></i><p>Tap to upload Excel file</p><small>Same format as PUPCs Weekly Format.xlsx</small></div>
+      <div id="pupc-file-prev"></div>
+      <input type="file" id="pupc-fi" accept=".xlsx" style="display:none" onchange="handlePupcXlsx(this.files)">
+    </div>
+    <div id="pupc-data-preview" style="display:none;">
+      <div class="fl" style="margin-bottom:6px;">Extracted data preview:</div>
+      <div style="overflow-x:auto;border-radius:10px;overflow:hidden;border:.5px solid #d0dce8;">
+        <table style="width:100%;border-collapse:collapse;font-size:10px;min-width:380px;">
+          <thead><tr style="background:#0C447C;color:#fff;">
+            <th style="padding:5px 7px;text-align:left;">MPS/CPS</th>
+            <th style="padding:5px 4px;text-align:center;">CF M</th>
+            <th style="padding:5px 4px;text-align:center;">CF F</th>
+            <th style="padding:5px 4px;text-align:center;">CF Total</th>
+            <th style="padding:5px 4px;text-align:center;">PUPC M</th>
+            <th style="padding:5px 4px;text-align:center;">PUPC F</th>
+            <th style="padding:5px 4px;text-align:center;font-weight:700;">Total</th>
+          </tr></thead>
+          <tbody id="pupc-preview-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="alert err" id="pupc-dup" style="display:none;"><i class="ti ti-alert-triangle"></i>Already submitted for this week.</div>
+  <button class="pbtn" id="pupc-btn" onclick="submitPupc()" disabled><i class="ti ti-send"></i>Submit PUPC Weekly Report</button>
+  <div class="proc" id="pupc-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+  <div id="pupc-done"></div>
 </div>
 
 <!-- CAMERA -->
@@ -483,6 +527,47 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="fg"><select class="fs" id="qr-stn-sel" onchange="genQR()"><option value="">Pumili ng himpilan...</option></select></div>
       <div id="qr-section" style="text-align:center;"></div>
     </div>
+    <div class="sec-lbl">PUPC Weekly Report <span class="stn-pill sp-b" id="pupc-count-badge" style="margin-left:4px;">0 stations</span></div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-users-group"></i>Weekly List of Persons Under PN Custody</div>
+      <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>Auto-populated when stations upload their Excel file in PHROs &amp; COs module. Data consolidates all station submissions.</div>
+      <div style="overflow-x:auto;">
+        <table id="pupc-master-tbl" style="width:100%;border-collapse:collapse;font-size:10px;min-width:480px;">
+          <thead>
+            <tr style="background:#0C447C;color:#fff;">
+              <th style="padding:6px 8px;text-align:left;min-width:100px;">MPS/CPS</th>
+              <th style="padding:6px 4px;text-align:center;">CF Male</th>
+              <th style="padding:6px 4px;text-align:center;">CF Female</th>
+              <th style="padding:6px 4px;text-align:center;">Total CF</th>
+              <th style="padding:6px 4px;text-align:center;">PUPC Male</th>
+              <th style="padding:6px 4px;text-align:center;">PUPC Female</th>
+              <th style="padding:6px 4px;text-align:center;">Total PUPCs</th>
+            </tr>
+          </thead>
+          <tbody id="pupc-master-body">
+            <tr><td colspan="7" style="padding:14px;text-align:center;font-size:12px;color:#94a3b8;">No submissions yet. Stations must upload their Excel file.</td></tr>
+          </tbody>
+          <tfoot id="pupc-master-foot" style="display:none;">
+            <tr style="background:#1F4E79;color:#fff;font-weight:700;">
+              <td style="padding:6px 8px;">TOTAL</td>
+              <td style="padding:6px 4px;text-align:center;" id="pupc-tot-cfm">0</td>
+              <td style="padding:6px 4px;text-align:center;" id="pupc-tot-cff">0</td>
+              <td style="padding:6px 4px;text-align:center;" id="pupc-tot-cft">0</td>
+              <td style="padding:6px 4px;text-align:center;" id="pupc-tot-pm">0</td>
+              <td style="padding:6px 4px;text-align:center;" id="pupc-tot-pf">0</td>
+              <td style="padding:6px 4px;text-align:center;" id="pupc-tot-pt">0</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="pupc-sig" style="display:none;margin-top:10px;padding-top:10px;border-top:.5px solid #d0dce8;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:10px;color:#5a6a7a;margin-bottom:8px;">
+          <div><div style="font-weight:600;color:#1a2332;">Prepared By:</div><input class="fi" id="pupc-prep-name" placeholder="Name..." style="margin-top:4px;font-size:11px;"><input class="fi" id="pupc-prep-rank" placeholder="Rank/Position..." style="margin-top:4px;font-size:11px;"></div>
+          <div><div style="font-weight:600;color:#1a2332;">Noted By:</div><input class="fi" id="pupc-noted-name" placeholder="Name..." style="margin-top:4px;font-size:11px;"><input class="fi" id="pupc-noted-rank" placeholder="Rank/Position..." style="margin-top:4px;font-size:11px;"></div>
+        </div>
+        <button class="sbtn" onclick="genPupcReport()"><i class="ti ti-printer"></i>Print PUPC Consolidated Report</button>
+      </div>
+    </div>
     <div class="sec-lbl">Submission notifications</div>
     <div class="notif-card"><div class="notif-title"><i class="ti ti-users"></i>Monthly PHROs &amp; COs</div>
       <div class="prog-wrap"><div class="prog-bar" id="phros-bar" style="width:0%"></div></div>
@@ -523,6 +608,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="bn" id="bn-med" onclick="goMod('med')"><i class="ti ti-stethoscope"></i><span>Medical</span></button>
     <button class="bn" id="bn-phros" onclick="goMod('phros')"><i class="ti ti-users"></i><span>PHROs</span><div class="nb-badge" id="phros-badge"></div></button>
     <button class="bn" id="bn-idd" onclick="goMod('idd')"><i class="ti ti-file-description"></i><span>IDD</span><div class="nb-badge" id="idd-badge"></div></button>
+    <button class="bn" id="bn-pupc" onclick="goMod('pupc')"><i class="ti ti-users-group"></i><span>PUPC</span></button>
     <button class="bn" id="bn-cam" onclick="goMod('cam')"><i class="ti ti-camera"></i><span>Cam</span></button>
     <button class="bn" id="bn-master" onclick="goMod('master')"><i class="ti ti-file-certificate"></i><span>Master</span></button>
   </div>
@@ -648,7 +734,7 @@ function launchApp(){
   document.getElementById('ub-name').textContent=role==='super'?'Super User ('+userId+')':myStation;
   document.getElementById('hdr-sub').textContent=role==='super'?'Super User — Full access':'Station · '+myStation;
   // Set station fields
-  ['pice-stn','med-stn','phros-stn','idd-stn'].forEach(id=>{
+  ['pice-stn','med-stn','phros-stn','idd-stn','pupc-stn'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.textContent=role==='station'?myStation:'All stations';
   });
@@ -761,11 +847,49 @@ function handlePhoto(mod,files){
     document.getElementById(mod+'-prev').innerHTML='<div class="file-prev"><i class="ti ti-photo"></i><span class="fp-n">'+f.name+'</span><button class="fp-r" onclick="photos[\''+mod+'\']=null;photos[\''+mod+'URL\']=\'\';document.getElementById(\''+mod+'-prev\').innerHTML=\'\';chkMod()">Remove</button></div>';
     chkMod();};r.readAsDataURL(f);
 }
+// ── PUPC data store ──
+let pupcData={};
+
 function handleXlsx(files){
   if(!files||!files[0])return;
   phrosFile=files[0];
-  document.getElementById('phros-prev').innerHTML='<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">'+phrosFile.name+'</span><button class="fp-r" onclick="phrosFile=null;document.getElementById(\'phros-prev\').innerHTML=\'\';chkMod()">Remove</button></div>';
+  document.getElementById('phros-prev').innerHTML='<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">'+phrosFile.name+'</span><button class="fp-r" onclick="phrosFile=null;document.getElementById('phros-prev').innerHTML='';chkMod()">Remove</button></div>';
   chkMod();
+}
+function parsePupcXlsx(rows,filename){
+  let headerRow=1;
+  for(let i=0;i<rows.length;i++){
+    if(rows[i].some(c=>String(c).toUpperCase().includes('MPS')||String(c).toUpperCase().includes('CPS')||String(c).toLowerCase().includes('station'))){headerRow=i;break;}
+  }
+  const tbody=document.getElementById('pupc-preview-body');
+  tbody.innerHTML='';
+  const extracted=[];
+  for(let i=headerRow+1;i<rows.length;i++){
+    const row=rows[i];
+    const station=String(row[0]||'').trim();
+    if(!station||station.toLowerCase().includes('total')||station.toLowerCase().includes('prepared')||station.toLowerCase().includes('noted'))break;
+    const cfM=pNum(row[1]),cfF=pNum(row[2]),cfT=pNum(row[3])||cfM+cfF;
+    const pupcM=pNum(row[4]),pupcF=pNum(row[5]),pupcT=pupcM+pupcF;
+    const note=String(row[1]||'').toLowerCase().includes('bjmp')?'Managed by BJMP':'';
+    extracted.push({station,cfM,cfF,cfT,pupcM,pupcF,pupcT,note});
+    const tr=document.createElement('tr');
+    tr.style.cssText='border-bottom:.5px solid #f0f4f8;'+(i%2?'background:#f8fafc;':'');
+    tr.innerHTML='<td style="padding:4px 6px;font-weight:500;color:#1a2332;">'+station+(note?' <span style="font-size:8px;color:#633806;">(BJMP)</span>':'')+'</td>'+
+      (note?'<td colspan="6" style="padding:4px 6px;font-size:9px;color:#633806;text-align:center;">Managed by BJMP</td>':
+      '<td style="padding:4px 6px;text-align:center;">'+cfM+'</td><td style="padding:4px 6px;text-align:center;">'+cfF+'</td>'+
+      '<td style="padding:4px 6px;text-align:center;font-weight:600;">'+cfT+'</td>'+
+      '<td style="padding:4px 6px;text-align:center;">'+pupcM+'</td><td style="padding:4px 6px;text-align:center;">'+pupcF+'</td>'+
+      '<td style="padding:4px 6px;text-align:center;font-weight:700;color:#0C447C;">'+pupcT+'</td>');
+    tbody.appendChild(tr);
+  }
+  document.getElementById('pupc-preview').style.display=extracted.length?'block':'none';
+  window._pupcExtracted=extracted;
+  window._pupcFilename=filename;
+}
+function pNum(v){
+  if(v===''||v===null||v===undefined)return 0;
+  const n=parseInt(String(v).replace(/[^0-9]/g,''));
+  return isNaN(n)?0:n;
 }
 function chkPice(){
   const w=document.getElementById('pice-week').value,m=document.getElementById('pice-month').value;
@@ -1030,11 +1154,221 @@ function updateIddNotif(){
 // ═══════════════════════════════════════════════════════
 // MASTER REPORT
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// PUPC WEEKLY MODULE
+// ═══════════════════════════════════════════════════════
+let pupcFile=null,pupcWeek='',pupcMonthVal='';
+
+function handlePupcXlsx(files){
+  if(!files||!files[0])return;
+  pupcFile=files[0];
+  document.getElementById('pupc-file-prev').innerHTML='<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">'+pupcFile.name+'</span><button class="fp-r" onclick="pupcFile=null;document.getElementById('pupc-file-prev').innerHTML='';document.getElementById('pupc-data-preview').style.display='none';chkPupc()">Remove</button></div>';
+  // Parse with SheetJS
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      parsePupcXlsx(rows,pupcFile.name);
+    }catch(err){
+      document.getElementById('pupc-data-preview').style.display='none';
+    }
+  };
+  reader.readAsArrayBuffer(pupcFile);
+  chkPupc();
+}
+
+function parsePupcXlsx(rows,filename){
+  // Find header row
+  let headerRow=1;
+  for(let i=0;i<rows.length;i++){
+    if(rows[i].some(c=>String(c).toUpperCase().includes('MPS')||String(c).toUpperCase().includes('CPS'))){headerRow=i;break;}
+  }
+  const tbody=document.getElementById('pupc-preview-body');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  const extracted=[];
+  for(let i=headerRow+1;i<rows.length;i++){
+    const row=rows[i];
+    const station=String(row[0]||'').trim();
+    if(!station||station.toLowerCase().includes('total')||station.toLowerCase().includes('prepared')||station.toLowerCase().includes('noted'))break;
+    const cfM=pNum(row[1]),cfF=pNum(row[2]),cfT=pNum(row[3])||cfM+cfF;
+    const pupcM=pNum(row[4]),pupcF=pNum(row[5]),pupcT=pupcM+pupcF;
+    const isBJMP=String(row[1]||'').toLowerCase().includes('bjmp');
+    extracted.push({station,cfM,cfF,cfT,pupcM,pupcF,pupcT,isBJMP});
+    const tr=document.createElement('tr');
+    tr.style.cssText='border-bottom:.5px solid #f0f4f8;'+(i%2?'background:#f8fafc;':'');
+    if(isBJMP){
+      tr.innerHTML='<td style="padding:4px 6px;color:#1a2332;">'+station+'</td><td colspan="6" style="padding:4px 6px;font-size:9px;color:#633806;text-align:center;font-weight:600;">Managed by BJMP</td>';
+    } else {
+      tr.innerHTML='<td style="padding:4px 6px;font-weight:500;color:#1a2332;">'+station+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;">'+cfM+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;">'+cfF+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;font-weight:600;">'+cfT+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;">'+pupcM+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;">'+pupcF+'</td>'+
+        '<td style="padding:4px 6px;text-align:center;font-weight:700;color:#0C447C;">'+pupcT+'</td>';
+    }
+    tbody.appendChild(tr);
+  }
+  const prev=document.getElementById('pupc-data-preview');
+  if(prev)prev.style.display=extracted.length?'block':'none';
+  window._pupcExtracted=extracted;
+  window._pupcFilename=filename;
+}
+
+function pNum(v){
+  if(v===''||v===null||v===undefined)return 0;
+  const n=parseInt(String(v).replace(/[^0-9]/g,''));
+  return isNaN(n)?0:n;
+}
+
+function chkPupc(){
+  const w=document.getElementById('pupc-week')?.value;
+  const m=document.getElementById('pupc-month')?.value;
+  const dup=records.find(r=>r.mod==='pupc'&&r.station===myStation&&r.week===w&&r.month===m);
+  const dupEl=document.getElementById('pupc-dup');
+  if(dupEl)dupEl.style.display=dup?'flex':'none';
+  const btn=document.getElementById('pupc-btn');
+  if(btn)btn.disabled=!(w&&m&&pupcFile&&!dup);
+}
+
+async function submitPupc(){
+  const w=document.getElementById('pupc-week').value;
+  const m=document.getElementById('pupc-month').value;
+  const btn=document.getElementById('pupc-btn');btn.disabled=true;
+  document.getElementById('pupc-proc').style.display='block';
+  await sleep(1200);
+  document.getElementById('pupc-proc').style.display='none';
+  const ts=new Date().toISOString();
+  const extracted=window._pupcExtracted||[];
+  // Store all rows in pupcData (super user gets all; station matches its row)
+  if(extracted.length){
+    if(role==='super'){
+      // Super submitting full consolidated file — store all
+      extracted.forEach(r=>{if(!r.isBJMP)pupcData[r.station]={cfM:r.cfM,cfF:r.cfF,cfT:r.cfT,pupcM:r.pupcM,pupcF:r.pupcF,pupcT:r.pupcT,week:w,month:m,ts};});
+    } else {
+      // Station user — match its station name or store under myStation
+      const match=extracted.find(r=>r.station.toLowerCase().replace(/[^a-z]/g,'').includes(myStation.toLowerCase().replace(/[^a-z]/g,'').substring(0,4))||myStation.toLowerCase().replace(/[^a-z]/g,'').includes(r.station.toLowerCase().replace(/[^a-z]/g,'').substring(0,4)));
+      if(match){pupcData[myStation]={cfM:match.cfM,cfF:match.cfF,cfT:match.cfT,pupcM:match.pupcM,pupcF:match.pupcF,pupcT:match.pupcT,week:w,month:m,ts};}
+      else if(extracted[0]){const r=extracted[0];pupcData[myStation]={cfM:r.cfM,cfF:r.cfF,cfT:r.cfT,pupcM:r.pupcM,pupcF:r.pupcF,pupcT:r.pupcT,week:w,month:m,ts};}
+    }
+  }
+  const rec={mod:'pupc',station:myStation,week:w,month:m,file:pupcFile?.name,rows:extracted.length,ts,flag:false};
+  records.push(rec);
+  const label=myStation+' — PUPC '+w+' · '+m+' · '+extracted.length+' stations';
+  addActivity('pupc',false,label);
+  buildHomeStats();
+  document.getElementById('pupc-done').innerHTML='<div class="card" style="text-align:center;"><i class="ti ti-circle-check" style="font-size:44px;color:#3B6D11;display:block;margin-bottom:8px;"></i><div style="font-size:16px;font-weight:700;color:#1a2332;margin-bottom:5px;">Submitted</div><p style="font-size:12px;color:#7a8a9a;margin-bottom:12px;">'+label+'</p><button class="gbtn" style="margin:auto;" onclick="resetPupc()"><i class="ti ti-refresh"></i>New submission</button></div>';
+  window._pupcExtracted=null;
+}
+
+function resetPupc(){
+  pupcFile=null;
+  document.getElementById('pupc-done').innerHTML='';
+  document.getElementById('pupc-file-prev').innerHTML='';
+  document.getElementById('pupc-data-preview').style.display='none';
+  document.getElementById('pupc-preview-body').innerHTML='';
+  document.getElementById('pupc-week').value='';
+  document.getElementById('pupc-month').value='May';
+  document.getElementById('pupc-dup').style.display='none';
+  document.getElementById('pupc-btn').disabled=true;
+  window._pupcExtracted=null;
+}
+
+function buildPupcMaster(){
+  const tbody=document.getElementById('pupc-master-body');
+  const tfoot=document.getElementById('pupc-master-foot');
+  const badge=document.getElementById('pupc-count-badge');
+  if(!tbody)return;
+  const stns=Object.keys(pupcData);
+  if(badge)badge.textContent=stns.length+' station'+(stns.length!==1?'s':'');
+  if(!stns.length){
+    tbody.innerHTML='<tr><td colspan="7" style="padding:14px;text-align:center;font-size:12px;color:#94a3b8;">No submissions yet.</td></tr>';
+    if(tfoot)tfoot.style.display='none';
+    const sig=document.getElementById('pupc-sig');if(sig)sig.style.display='none';
+    return;
+  }
+  const SHORT=['1st PMFC','2nd PMFC','Angat','Balagtas','Baliwag','Bocaue','Bulakan','Bustos','Calumpit','DRT','Guiguinto','Hagonoy','Malolos','Marilao','Meycauayan','Norzagaray','Obando','Pandi','Paombong','Plaridel','Pulilan','San Ildefonso','SJDM','San Miguel','San Rafael','Santa Maria','PHQ'];
+  let tCfM=0,tCfF=0,tCfT=0,tPM=0,tPF=0,tPT=0;
+  tbody.innerHTML='';
+  SHORT.forEach((s,idx)=>{
+    const bjmp=s.toLowerCase().includes('guiguinto');
+    const key=Object.keys(pupcData).find(k=>k.toLowerCase().replace(/[^a-z]/g,'').includes(s.toLowerCase().replace(/[^a-z]/g,'').substring(0,5))||s.toLowerCase().replace(/[^a-z]/g,'').includes(k.toLowerCase().replace(/[^a-z]/g,'').substring(0,5)));
+    const d=key?pupcData[key]:null;
+    const tr=document.createElement('tr');
+    tr.style.cssText='border-bottom:.5px solid #f0f4f8;'+(idx%2?'background:#f8fafc;':'');
+    if(bjmp){
+      tr.innerHTML='<td style="padding:5px 8px;color:#1a2332;">'+s+'</td><td colspan="6" style="padding:5px 8px;font-size:9px;color:#633806;font-weight:600;">Managed by BJMP</td>';
+    } else if(d){
+      tCfM+=d.cfM;tCfF+=d.cfF;tCfT+=d.cfT;tPM+=d.pupcM;tPF+=d.pupcF;tPT+=d.pupcT;
+      tr.innerHTML='<td style="padding:5px 8px;font-weight:500;color:#1a2332;">'+s+'</td>'+
+        '<td style="padding:5px 8px;text-align:center;">'+d.cfM+'</td>'+
+        '<td style="padding:5px 8px;text-align:center;">'+d.cfF+'</td>'+
+        '<td style="padding:5px 8px;text-align:center;font-weight:600;">'+d.cfT+'</td>'+
+        '<td style="padding:5px 8px;text-align:center;">'+d.pupcM+'</td>'+
+        '<td style="padding:5px 8px;text-align:center;">'+d.pupcF+'</td>'+
+        '<td style="padding:5px 8px;text-align:center;font-weight:700;color:#0C447C;">'+d.pupcT+'</td>';
+    } else {
+      tr.style.opacity='.45';
+      tr.innerHTML='<td style="padding:5px 8px;color:#94a3b8;">'+s+'</td><td colspan="6" style="padding:5px 8px;text-align:center;font-size:9px;color:#94a3b8;">Not yet submitted</td>';
+    }
+    tbody.appendChild(tr);
+  });
+  const ids=['pupc-tot-cfm','pupc-tot-cff','pupc-tot-cft','pupc-tot-pm','pupc-tot-pf','pupc-tot-pt'];
+  [tCfM,tCfF,tCfT,tPM,tPF,tPT].forEach((v,i)=>{const el=document.getElementById(ids[i]);if(el)el.textContent=v;});
+  if(tfoot)tfoot.style.display='';
+  const sig=document.getElementById('pupc-sig');if(sig)sig.style.display='block';
+}
+
+function genPupcReport(){
+  const pn=document.getElementById('pupc-prep-name')?.value||'________________________';
+  const pr=document.getElementById('pupc-prep-rank')?.value||'HRAO PNCO';
+  const nn=document.getElementById('pupc-noted-name')?.value||'________________________';
+  const nr=document.getElementById('pupc-noted-rank')?.value||'C, PPHRAO';
+  const SHORT=['1st PMFC','2nd PMFC','Angat','Balagtas','Baliwag','Bocaue','Bulakan','Bustos','Calumpit','DRT','Guiguinto','Hagonoy','Malolos','Marilao','Meycauayan','Norzagaray','Obando','Pandi','Paombong','Plaridel','Pulilan','San Ildefonso','SJDM','San Miguel','San Rafael','Santa Maria','PHQ'];
+  let tCfM=0,tCfF=0,tCfT=0,tPM=0,tPF=0,tPT=0;
+  const rows=SHORT.map((s,i)=>{
+    const bjmp=s.toLowerCase().includes('guiguinto');
+    const key=Object.keys(pupcData).find(k=>k.toLowerCase().replace(/[^a-z]/g,'').includes(s.toLowerCase().replace(/[^a-z]/g,'').substring(0,5))||s.toLowerCase().replace(/[^a-z]/g,'').includes(k.toLowerCase().replace(/[^a-z]/g,'').substring(0,5)));
+    const d=key?pupcData[key]:null;
+    const bg=i%2?'#f8fafc':'#fff';
+    if(bjmp)return '<tr style="background:'+bg+';"><td style="padding:5px 8px;font-weight:500;border:.5px solid #BDD7EE;">'+s+'</td><td colspan="6" style="padding:5px 8px;font-size:9px;color:#633806;font-weight:600;border:.5px solid #BDD7EE;text-align:center;">Managed by BJMP</td></tr>';
+    if(d){tCfM+=d.cfM;tCfF+=d.cfF;tCfT+=d.cfT;tPM+=d.pupcM;tPF+=d.pupcF;tPT+=d.pupcT;
+      return '<tr style="background:'+bg+';"><td style="padding:5px 8px;font-weight:600;background:#DEEAF1;border:.5px solid #BDD7EE;">'+s+'</td>'+
+        [d.cfM,d.cfF,d.cfT,d.pupcM,d.pupcF,d.pupcT].map(v=>'<td style="padding:5px 8px;text-align:center;border:.5px solid #BDD7EE;">'+v+'</td>').join('')+'</tr>';}
+    return '<tr style="background:'+bg+';opacity:.5;"><td style="padding:5px 8px;color:#94a3b8;border:.5px solid #BDD7EE;">'+s+'</td><td colspan="6" style="padding:5px 8px;text-align:center;font-size:9px;color:#94a3b8;border:.5px solid #BDD7EE;">Not submitted</td></tr>';
+  }).join('');
+  const w=window.open('','_blank');if(!w)return;
+  w.document.write('<!DOCTYPE html><html><head><title>PUPC Weekly Report</title>'+
+    '<style>body{font-family:Arial,sans-serif;padding:20px;font-size:11px;}.conf{font-size:9px;font-weight:700;text-align:center;letter-spacing:1px;color:#A32D2D;margin:4px 0;}h3{text-align:center;font-size:13px;margin:4px 0;}p{text-align:center;color:#555;font-size:10px;margin:2px 0 12px;}table{width:100%;border-collapse:collapse;}th{background:#1F4E79;color:#fff;padding:6px 8px;border:1px solid #2d6aa0;font-size:10px;}.sig-wrap{display:flex;justify-content:space-between;margin-top:30px;}.sig-block{text-align:center;min-width:200px;}.sig-line{border-top:1px solid #000;margin-top:40px;padding-top:4px;font-size:10px;}</style></head><body>'+
+    '<div class="conf">CONFIDENTIAL</div>'+
+    '<h3>WEEKLY LIST OF PERSONS UNDER PN CUSTODY</h3>'+
+    '<p>Bulacan Police Provincial Office &middot; Human Rights Affairs &middot; PRO 3</p>'+
+    '<table><thead><tr>'+
+    '<th style="text-align:left;min-width:100px;">MPS/CPS</th>'+
+    '<th>Nr of CF (Male)</th><th>Nr of CF (Female)</th><th>Total Nr of CF</th>'+
+    '<th>Nr of PUPC (Male)</th><th>Nr of PUPC (Female)</th><th>Total NO. of PUPCs</th>'+
+    '</tr></thead><tbody>'+rows+'</tbody>'+
+    '<tfoot><tr style="background:#1F4E79;color:#fff;font-weight:700;">'+
+    '<td style="padding:6px 8px;border:.5px solid #2d6aa0;">TOTAL</td>'+
+    [tCfM,tCfF,tCfT,tPM,tPF,tPT].map(v=>'<td style="padding:6px 8px;text-align:center;border:.5px solid #2d6aa0;">'+v+'</td>').join('')+
+    '</tr></tfoot></table>'+
+    '<div class="sig-wrap">'+
+    '<div class="sig-block"><div class="sig-line"><strong>'+pn+'</strong><br>'+pr+'<br>Prepared By</div></div>'+
+    '<div class="sig-block"><div class="sig-line"><strong>'+nn+'</strong><br>'+nr+'<br>Noted By</div></div>'+
+    '</div><div class="conf" style="margin-top:10px;">CONFIDENTIAL</div>'+
+    '</body></html>');
+  w.document.close();setTimeout(()=>w.print(),600);
+}
+
 function buildMasterView(){
   if(role!=='super'){document.getElementById('master-denied').style.display='flex';document.getElementById('master-body').style.display='none';return;}
   document.getElementById('master-denied').style.display='none';
   const mb=document.getElementById('master-body');mb.style.display='flex';mb.style.flexDirection='column';
   updatePhrosNotif();updateIddNotif();buildMaster();
+  buildPupcMaster();
   buildConcernsList();
   updateAuditDisplay();
 }
