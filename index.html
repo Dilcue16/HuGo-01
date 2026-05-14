@@ -1032,7 +1032,7 @@ async function submitMod(mod){
   if(mod!=='phros'&&mod!=='idd') records.push({mod,station:myStation,month:modMonths[mod]||'',flag,ts,label,payload});
   addActivity(mod,flag,label);buildHomeStats();
   const jsonStr=JSON.stringify(payload,null,2);
-  document.getElementById(mod+'-success').innerHTML=`<div class="success-card"><i class="ti ti-circle-check sico"></i><div class="s-title">Submitted</div><p class="s-sub">${label}</p><div class="json-box">${jsonStr}</div><div style="display:flex;gap:8px;margin-top:8px;"><button class="copy-btn" style="flex:1;" onclick="navigator.clipboard.writeText(\`${jsonStr.replace(/`/g,"'")}\`)"><i class="ti ti-copy"></i>Copy</button><button class="gbtn" onclick="resetMod('${mod}')"><i class="ti ti-refresh"></i>New</button></div></div>`;
+  document.getElementById(mod+'-success').innerHTML=`<div class="success-card"><i class="ti ti-circle-check sico"></i><div class="s-title">Submitted</div><p class="s-sub">${label}</p><div class="json-box">${jsonStr}</div><div style="display:flex;gap:8px;margin-top:8px;"><button class="copy-btn" style="flex:1;" onclick="navigator.clipboard.writeText(document.getElementById(mod+'-success').querySelector('.json-box').textContent)"><i class="ti ti-copy"></i>Copy</button><button class="gbtn" onclick="resetMod('${mod}')"><i class="ti ti-refresh"></i>New</button></div></div>`;
 }
 
 function resetMod(mod){
@@ -1580,7 +1580,13 @@ function setConditionStatus(id,status,confidence,reason,tier){
     ${confidence!==undefined?`<div style="font-size:9px;color:#7a8a9a;margin-top:3px;">Confidence: ${Math.round(confidence*100||confidence)}% &nbsp;·&nbsp; Threshold: ${thresholdPct}</div>`:''}
     <div class="ai-conf-mini"><div class="ai-conf-mini-fill ${sKey==='verified'?'conf-green':sKey==='failed'?'conf-red':'conf-amber'}" id="conf-fill-${id}" style="width:0%"></div></div>
     ${reason?`<div class="ai-rejection" id="rej-${id}" style="display:block;">⚠ ${reason}</div>`:`<div class="ai-rejection" id="rej-${id}"></div>`}
-    <div class="ai-ts" id="ts-${id}"></div>`;
+    <div class="ai-ts" id="ts-${id}"></div>
+    <div style="display:flex;gap:4px;margin-top:6px;">
+      <button onclick="manualPass(${id})" style="flex:1;padding:6px 2px;background:#3B6D11;color:#fff;border:none;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">✓ PASS</button>
+      <button onclick="manualPhoto(${id})" style="flex:0.7;padding:6px 2px;background:#185FA5;color:#fff;border:none;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">📷</button>
+      <button onclick="manualFail(${id})" style="flex:1;padding:6px 2px;background:#A32D2D;color:#fff;border:none;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;">✗ FAIL</button>
+    </div>
+    <input type="text" id="note-${id}" placeholder="Inspector notes..." style="width:100%;margin-top:5px;padding:5px 8px;font-size:10px;font-family:inherit;border:.5px solid #d0dce8;border-radius:7px;outline:none;background:#f8fafc;color:#1a2332;box-sizing:border-box;">\`;
 }
 
 function animateConf(id,from,to,dur){
@@ -1638,6 +1644,110 @@ function manualCapture(){
   strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
   document.getElementById('cap-count').textContent=capturedImages.length;
   addDetLog('MANUAL','[MAN] Manual screenshot captured by inspector','info');
+}
+
+// ── MANUAL PASS / FAIL / PHOTO ──────────────────────────────────────────────
+function takeCondSnap(condId, verdict){
+  const cond=AI_CONDITIONS.find(c=>c.id===condId);
+  const vid=document.getElementById('cam-video');
+  const cv=document.createElement('canvas');
+  cv.width=vid.videoWidth||320;cv.height=vid.videoHeight||240;
+  const ctx=cv.getContext('2d');
+  try{ctx.drawImage(vid,0,0,cv.width,cv.height);}catch(e){}
+  const color=verdict==='PASS'?'rgba(59,109,17,.88)':verdict==='FAIL'?'rgba(163,45,45,.88)':'rgba(4,44,83,.82)';
+  ctx.fillStyle=color;ctx.fillRect(0,cv.height-26,cv.width,26);
+  ctx.fillStyle='#fff';ctx.font='bold 10px monospace';
+  ctx.fillText('['+(cond?.id||condId)+'] '+(cond?.label||'condition')+' · Inspector: '+verdict+' · '+new Date().toISOString().substring(11,19),5,cv.height-9);
+  const flash=document.getElementById('cap-flash');
+  if(flash){flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);}
+  return cv.toDataURL('image/jpeg',0.88);
+}
+
+function addCondThumb(url, status){
+  const strip=document.getElementById('cap-strip');if(!strip) return;
+  const thumb=document.createElement('div');
+  thumb.className='cap-thumb '+(status==='pass'?'passed':status==='fail'?'failed':'unverified');
+  const cv=document.createElement('canvas');cv.width=64;cv.height=48;
+  const ctx=cv.getContext('2d');
+  if(url){const img=new Image();img.onload=()=>ctx.drawImage(img,0,0,64,48);img.src=url;}
+  thumb.appendChild(cv);
+  const lbl=document.createElement('div');lbl.className='cap-thumb-label';
+  lbl.textContent=status==='pass'?'✓ PASS':status==='fail'?'✗ FAIL':'📷 PHOTO';
+  thumb.appendChild(lbl);
+  strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
+  const cnt=document.getElementById('cap-count');
+  if(cnt) cnt.textContent=capturedImages.length;
+}
+
+function manualPass(condId){
+  const cond=AI_CONDITIONS.find(c=>c.id===condId);if(!cond) return;
+  const note=document.getElementById('note-'+condId)?.value||'';
+  const url=takeCondSnap(condId,'PASS');
+  // Update condition result
+  conditionResults[condId]={conditionId:condId,name:cond.name,label:cond.label,
+    status:STATUS.VERIFIED,tier:'verified',confidence:100,
+    inspector_decision:'PASS',inspector_notes:note,
+    timestamp:new Date().toISOString(),dataURL:url,
+    json:{inspection_type:cond.name,label:cond.label,
+      inspector_decision:'PASS',inspector_notes:note,
+      confidence_score:100,final_status:'VERIFIED',
+      failure_reasons:[],
+      verification_summary:cond.name+' — Inspector confirmed PASS'+(note?' · '+note:'')}
+  };
+  capturedImages.push({conditionId:condId,name:cond.name,status:'verified',
+    dataURL:url,timestamp:new Date().toISOString()});
+  addCondThumb(url,'pass');
+  // Update card visually
+  const card=document.getElementById('aic-'+condId);
+  if(card){card.className='ai-cond passed';}
+  const badge=card?.querySelector('.ai-status-badge');
+  if(badge){badge.className='ai-status-badge badge-passed';badge.textContent='✓ PASSED — Inspector';}
+  const ts=document.getElementById('ts-'+condId);
+  if(ts) ts.textContent='Inspector PASS · '+new Date().toISOString().substring(11,19)+' UTC';
+  const fill=document.getElementById('conf-fill-'+condId);
+  if(fill){fill.className='ai-conf-mini-fill conf-green';fill.style.width='100%';}
+  addDetLog('PASS','['+condId+'] ✓ Inspector PASS — '+cond.name+(note?' | Notes: '+note:''),'ok');
+}
+
+function manualFail(condId){
+  const cond=AI_CONDITIONS.find(c=>c.id===condId);if(!cond) return;
+  const note=document.getElementById('note-'+condId)?.value||'';
+  const url=takeCondSnap(condId,'FAIL');
+  conditionResults[condId]={conditionId:condId,name:cond.name,label:cond.label,
+    status:STATUS.FAILED,tier:'failed',confidence:0,
+    inspector_decision:'FAIL',inspector_notes:note,
+    timestamp:new Date().toISOString(),dataURL:url,
+    json:{inspection_type:cond.name,label:cond.label,
+      inspector_decision:'FAIL',inspector_notes:note,
+      confidence_score:0,final_status:'FAILED',
+      failure_reasons:['Inspector confirmed non-compliance'+(note?' — '+note:'')],
+      verification_summary:cond.name+' — Inspector confirmed FAIL'+(note?' · '+note:'')}
+  };
+  capturedImages.push({conditionId:condId,name:cond.name,status:'failed',
+    dataURL:url,timestamp:new Date().toISOString()});
+  addCondThumb(url,'fail');
+  const card=document.getElementById('aic-'+condId);
+  if(card){card.className='ai-cond failed';}
+  const badge=card?.querySelector('.ai-status-badge');
+  if(badge){badge.className='ai-status-badge badge-failed';badge.textContent='✗ FAILED — Inspector';}
+  const ts=document.getElementById('ts-'+condId);
+  if(ts) ts.textContent='Inspector FAIL · '+new Date().toISOString().substring(11,19)+' UTC';
+  const fill=document.getElementById('conf-fill-'+condId);
+  if(fill){fill.className='ai-conf-mini-fill conf-red';fill.style.width='100%';}
+  const fi=document.getElementById('flag-ind');
+  if(fi){fi.style.display='flex';fi.innerHTML='<i class="ti ti-flag" style="font-size:11px"></i>'+cond.name+' FAILED';}
+  addDetLog('FAIL','['+condId+'] ✗ Inspector FAIL — '+cond.name+(note?' | Notes: '+note:''),'err');
+}
+
+function manualPhoto(condId){
+  const cond=AI_CONDITIONS.find(c=>c.id===condId);if(!cond) return;
+  const url=takeCondSnap(condId,'PHOTO');
+  capturedImages.push({conditionId:condId,name:cond.name,status:'captured',
+    dataURL:url,timestamp:new Date().toISOString()});
+  addCondThumb(url,'photo');
+  const ts=document.getElementById('ts-'+condId);
+  if(ts) ts.textContent='📷 Photo captured · '+new Date().toISOString().substring(11,19)+' UTC';
+  addDetLog('PHOTO','['+condId+'] 📷 Manual photo — '+cond.name,'info');
 }
 
 function stopCam(){
