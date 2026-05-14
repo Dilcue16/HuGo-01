@@ -1660,9 +1660,7 @@ function sessionExpire(){
   auditLog.unshift({ts:new Date().toISOString(),user_id:userId,role,
     module:'SYSTEM',action:'SESSION_TIMEOUT',access_granted:false,
     note:'Auto-logout after '+(role==='super'?'30':'15')+' min inactivity'});
-  alert('Your session has expired due to inactivity.
-
-'+who+' has been logged out.');
+  alert('Your session has expired due to inactivity.\n\n'+who+' has been logged out.');
   logout();
 }
 
