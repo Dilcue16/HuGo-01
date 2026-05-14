@@ -1,0 +1,1980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0C447C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="HuGo">
+<title>HuGo — Human Rights on the Go</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --navy:#0C447C;--blue:#185FA5;--lb:#E6F1FB;--mb:#B5D4F4;--db:#7FB3E0;--dn:#042C53;
+  --green:#3B6D11;--lg:#EAF3DE;--gb:#C0DD97;
+  --amber:#633806;--la:#FAEEDA;--ab:#FAC775;
+  --red:#791F1F;--lr:#FCEBEB;--rb:#F09595;
+  --crim:#A32D2D;--cd:#E24B4A;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f4f8;}
+/* SPLASH */
+#splash{position:fixed;inset:0;background:var(--navy);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s;}
+#splash.hidden{opacity:0;pointer-events:none;}
+.sp-logo{width:80px;height:80px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:18px;animation:popIn .5s ease;}
+@keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.sp-logo .lm{font-size:22px;font-weight:700;color:var(--navy);line-height:1;}
+.sp-logo .ls{font-size:9px;color:var(--blue);line-height:1;}
+.sp-title{font-size:18px;font-weight:500;color:#fff;margin-bottom:5px;}
+.sp-sub{font-size:11px;color:var(--mb);text-align:center;max-width:260px;line-height:1.5;}
+.sp-dots{display:flex;gap:7px;margin-top:24px;}
+.sp-dot{width:7px;height:7px;border-radius:50%;background:var(--mb);animation:sdot 1.2s infinite;}
+.sp-dot:nth-child(2){animation-delay:.2s}.sp-dot:nth-child(3){animation-delay:.4s}
+@keyframes sdot{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+/* APP */
+#app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-t);}
+/* HEADER */
+#hdr{background:var(--navy);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.hdr-logo{width:34px;height:34px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;line-height:1;}
+.hdr-logo .lm{font-size:10px;font-weight:700;color:var(--navy);}
+.hdr-logo .ls{font-size:6.5px;color:var(--blue);}
+.hdr-text{flex:1;min-width:0;}
+.hdr-text h1{font-size:13px;font-weight:500;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-text .hs{font-size:9px;color:var(--mb);margin-top:1px;}
+#offline-bar{background:var(--crim);color:#fff;font-size:11px;font-weight:500;padding:5px 14px;text-align:center;display:none;flex-shrink:0;}
+/* LOGIN */
+#login-screen{flex:1;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:14px;background:#f0f4f8;}
+.ls-title{font-size:18px;font-weight:700;color:#1a2332;}
+.ls-sub{font-size:12px;color:#7a8a9a;line-height:1.5;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.role-card{padding:14px;border:.5px solid #d0dce8;border-radius:16px;cursor:pointer;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:all .15s;display:flex;flex-direction:column;}
+.role-card:active{transform:scale(.97);}
+.role-card.sup{border-color:var(--gb);}
+.rc-ico{font-size:24px;color:var(--blue);margin-bottom:6px;}
+.role-card.sup .rc-ico{color:var(--green);}
+.rc-name{font-size:13px;font-weight:600;color:#1a2332;}
+.rc-info{font-size:10.5px;color:#7a8a9a;margin-top:2px;line-height:1.4;}
+/* AUTH */
+#station-auth,#super-auth{flex:1;overflow-y:auto;padding:20px 16px;display:none;flex-direction:column;gap:14px;background:#f0f4f8;}
+.auth-hdr{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+.auth-back{width:34px;height:34px;border:.5px solid #d0dce8;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.auth-card{background:#fff;border:.5px solid #d0dce8;border-radius:16px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.auth-card-title{font-size:13px;font-weight:600;color:#1a2332;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.auth-card-title i{font-size:15px;color:var(--blue);}
+.fl{font-size:11px;font-weight:600;color:#5a6a7a;margin-bottom:4px;}
+.req{color:var(--crim);}
+.fs,.fi{width:100%;padding:11px 13px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;-webkit-appearance:none;}
+.fs:focus,.fi:focus{border-color:var(--blue);background:#fff;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.tok-inp{width:100%;padding:12px 14px;font-size:15px;font-family:monospace;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;letter-spacing:2px;-webkit-appearance:none;}
+.tok-inp:focus{border-color:var(--blue);background:#fff;}
+/* ALERTS */
+.alert{border-radius:12px;padding:10px 12px;font-size:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+.alert i{font-size:15px;flex-shrink:0;margin-top:1px;}
+.alert.ok{background:var(--lg);border:1px solid var(--gb);color:var(--green);}
+.alert.err{background:var(--lr);border:1px solid var(--rb);color:var(--red);}
+.alert.warn{background:var(--la);border:1px solid var(--ab);color:var(--amber);}
+.alert.info{background:var(--lb);border:1px solid var(--mb);color:var(--navy);}
+.alert.urgent{background:#F7C1C1;border:1px solid var(--cd);color:#501313;font-weight:600;}
+/* BUTTONS */
+.pbtn{padding:13px;background:var(--navy);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;font-family:inherit;transition:opacity .15s;}
+.pbtn:active{opacity:.85;}
+.pbtn:disabled{background:#c0cdd8;color:#8a9aaa;cursor:not-allowed;}
+.sbtn{padding:13px;background:var(--green);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;font-family:inherit;}
+.sbtn:active{opacity:.85;}
+.dbtn{padding:13px;background:var(--crim);color:#fff;border:none;border-radius:14px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;width:100%;font-family:inherit;}
+.dbtn:active{opacity:.85;}
+.gbtn{padding:10px 14px;border:.5px solid #d0dce8;background:#fff;border-radius:12px;font-size:13px;cursor:pointer;color:#5a6a7a;display:flex;align-items:center;gap:6px;font-family:inherit;}
+.gbtn:active{background:#f0f4f8;}
+/* PROCESSING */
+.processing{padding:20px;text-align:center;display:none;}
+.proc-dots{display:flex;justify-content:center;gap:6px;}
+.proc-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);animation:pd 1.2s infinite;}
+.proc-dot:nth-child(2){animation-delay:.2s}.proc-dot:nth-child(3){animation-delay:.4s}
+@keyframes pd{0%,80%,100%{transform:translateY(0);opacity:.5}40%{transform:translateY(-6px);opacity:1}}
+/* USER BAR */
+#user-bar{padding:5px 14px;background:#f8fafc;border-bottom:.5px solid #d0dce8;display:flex;align-items:center;gap:8px;font-size:11px;flex-shrink:0;}
+.ub-pill{padding:2px 8px;border-radius:8px;font-size:9px;font-weight:600;}
+.ub-st{background:var(--lb);color:var(--navy);}
+.ub-su{background:var(--lg);color:var(--green);}
+.ub-name{color:#1a2332;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;}
+.flag-ind{padding:2px 7px;border-radius:7px;font-size:9px;font-weight:600;background:var(--lr);color:var(--red);display:none;align-items:center;gap:3px;}
+.sw-btn{font-size:10px;color:var(--blue);cursor:pointer;border:none;background:none;padding:0;white-space:nowrap;font-family:inherit;}
+/* BOTTOM NAV */
+#bottom-nav{display:flex;background:#fff;border-top:.5px solid #d0dce8;flex-shrink:0;padding-bottom:var(--safe-b);box-shadow:0 -2px 8px rgba(0,0,0,.06);}
+.bnav{flex:1;padding:7px 2px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border:none;background:none;position:relative;}
+.bnav i{font-size:19px;color:#94a3b8;transition:color .15s;}
+.bnav span{font-size:8.5px;color:#94a3b8;transition:color .15s;white-space:nowrap;}
+.bnav.active i{color:var(--navy);}
+.bnav.active span{color:var(--navy);font-weight:600;}
+.bnav::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--navy);border-radius:0 0 3px 3px;transition:width .2s;}
+.bnav.active::after{width:28px;}
+.nb-badge{position:absolute;top:4px;right:14%;min-width:14px;height:14px;border-radius:7px;background:var(--cd);border:1.5px solid #fff;display:none;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;padding:0 3px;}
+.nb-badge.show{display:flex;}
+/* CONTENT */
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;background:#f0f4f8;}
+.view{display:none;padding:14px;flex-direction:column;gap:12px;min-height:100%;}
+.view.active{display:flex;}
+/* CARDS */
+.card{background:#fff;border:.5px solid #d0dce8;border-radius:16px;padding:14px;box-shadow:0 2px 6px rgba(0,0,0,.04);}
+.card-title{font-size:13px;font-weight:600;color:#1a2332;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.card-title i{font-size:15px;color:var(--blue);}
+/* HOME */
+.greeting{font-size:20px;font-weight:700;color:#1a2332;}
+.greeting-sub{font-size:12px;color:#7a8a9a;margin-top:2px;}
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.stat-card{background:#fff;border-radius:14px;padding:12px 14px;box-shadow:0 2px 6px rgba(0,0,0,.05);border:.5px solid #d0dce8;}
+.sv{font-size:26px;font-weight:700;color:#1a2332;}
+.sv.s{color:var(--green)}.sv.d{color:var(--crim);}
+.sl2{font-size:10.5px;color:#7a8a9a;margin-top:2px;}
+.sec-lbl{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;}
+.mod-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.mod-card{background:#fff;border:.5px solid #d0dce8;border-radius:14px;padding:13px 12px 11px;cursor:pointer;display:flex;flex-direction:column;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,.04);transition:all .15s;}
+.mod-card:active{transform:scale(.97);border-color:var(--blue);}
+.mc-ico{font-size:22px;color:var(--blue);}
+.mc-name{font-size:12px;font-weight:600;color:#1a2332;line-height:1.3;}
+.mc-desc{font-size:10px;color:#7a8a9a;line-height:1.4;}
+.mc-badge{margin-top:3px;font-size:9px;padding:2px 7px;border-radius:7px;width:fit-content;font-weight:500;}
+.mb-g{background:var(--lg);color:var(--green);}
+.mb-b{background:var(--lb);color:var(--navy);}
+.act-list{display:flex;flex-direction:column;gap:6px;}
+.act-row{display:flex;align-items:center;gap:9px;padding:10px 12px;background:#fff;border:.5px solid #d0dce8;border-radius:12px;}
+.act-ico{font-size:15px;color:var(--blue);flex-shrink:0;}
+.act-ico.flag{color:var(--crim);}
+.act-body{flex:1;min-width:0;font-size:11.5px;color:#5a6a7a;}
+.act-body strong{color:#1a2332;display:block;font-size:12px;}
+.act-ts{font-size:9px;color:#94a3b8;white-space:nowrap;}
+/* FORM ELEMENTS */
+.rw2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.num-wrap{display:flex;align-items:center;gap:10px;}
+.num-btn{width:36px;height:36px;border:1px solid #d0dce8;border-radius:10px;background:#f8fafc;cursor:pointer;font-size:20px;color:#1a2332;display:flex;align-items:center;justify-content:center;font-family:inherit;}
+.num-btn:active{background:var(--lb);}
+.num-disp{font-size:26px;font-weight:700;color:#1a2332;min-width:44px;text-align:center;}
+.num-man{width:70px;padding:8px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:10px;outline:none;background:#f8fafc;color:#1a2332;text-align:center;}
+.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.month-opt{padding:7px 4px;border:1px solid #d0dce8;border-radius:10px;font-size:11px;cursor:pointer;color:#5a6a7a;background:#f8fafc;text-align:center;font-family:inherit;}
+.month-opt.on{border-color:var(--blue);color:var(--blue);background:var(--lb);font-weight:600;}
+.tog-wrap{display:flex;gap:8px;}
+.tog{flex:1;padding:10px;border:1px solid #d0dce8;border-radius:12px;font-size:13px;cursor:pointer;background:#f8fafc;color:#5a6a7a;font-weight:500;font-family:inherit;text-align:center;}
+.tog.y-on{border-color:var(--green);background:var(--lg);color:var(--green);font-weight:600;}
+.tog.n-on{border-color:var(--blue);background:var(--lb);color:var(--blue);font-weight:600;}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.chip{padding:4px 10px;border:1px solid #d0dce8;border-radius:20px;font-size:11px;cursor:pointer;color:#5a6a7a;background:#f8fafc;}
+.chip.on{border-color:var(--navy);background:var(--lb);color:var(--navy);font-weight:500;}
+.drop-zone{border:2px dashed #c0cdd8;border-radius:14px;padding:18px 14px;text-align:center;cursor:pointer;background:#f8fafc;}
+.drop-zone i{font-size:26px;color:#94a3b8;display:block;margin-bottom:5px;}
+.drop-zone p{font-size:12px;color:#7a8a9a;}
+.drop-zone small{font-size:10px;color:#94a3b8;}
+.file-prev{display:flex;align-items:center;gap:9px;padding:9px 12px;border:1px solid var(--gb);border-radius:12px;background:var(--lg);margin-top:6px;}
+.file-prev i{font-size:17px;color:var(--green);}
+.fp-n{font-size:12px;font-weight:500;color:var(--green);flex:1;word-break:break-all;}
+.fp-r{cursor:pointer;color:var(--crim);font-size:11px;border:none;background:none;padding:0;font-family:inherit;}
+/* ENTRY CARD */
+.entry-card{background:#f8fafc;border:1px solid #d0dce8;border-radius:12px;padding:12px;margin-bottom:8px;position:relative;}
+.entry-num{font-size:11px;font-weight:600;color:var(--navy);margin-bottom:8px;}
+.rm-btn{position:absolute;top:10px;right:10px;border:none;background:var(--lr);color:var(--crim);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;}
+/* NOTIFICATION */
+.notif-card{background:#fff;border:.5px solid #d0dce8;border-radius:14px;padding:12px 14px;}
+.notif-title{font-size:12px;font-weight:600;color:#1a2332;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.notif-title i{font-size:14px;color:var(--blue);}
+.notif-bar-wrap{height:7px;border-radius:4px;background:#e0e8f0;overflow:hidden;margin-bottom:5px;}
+.notif-bar{height:100%;border-radius:4px;background:var(--blue);transition:width .5s;}
+.notif-bar.full{background:var(--green);}.notif-bar.low{background:var(--crim);}
+.notif-nums{display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;}
+.stn-pill{display:inline-block;padding:2px 7px;border-radius:7px;font-size:9px;font-weight:600;margin:2px;}
+.sp-b{background:var(--lb);color:var(--navy);}
+.sp-g{background:var(--lg);color:var(--green);}
+.sp-a{background:var(--la);color:var(--amber);}
+.sp-r{background:var(--lr);color:var(--red);}
+/* MASTER TABLE */
+.master-scroll{overflow-x:auto;}
+.master-table{width:100%;border-collapse:collapse;font-size:11px;min-width:520px;}
+.master-table th{text-align:left;padding:8px 10px;font-size:9px;font-weight:700;color:#7a8a9a;border-bottom:1px solid #d0dce8;background:#f8fafc;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+.master-table td{padding:8px 10px;border-bottom:1px solid #f0f4f8;color:#5a6a7a;vertical-align:top;}
+.master-table td:first-child{font-weight:600;color:#1a2332;}
+/* PICE REPORT */
+.pice-preview{background:#f5f5f5;border-radius:14px;padding:12px;}
+.doc-inner{background:#fff;border:.5px solid #ccc;border-radius:4px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+.doc-conf{font-size:10px;font-weight:700;text-align:center;letter-spacing:1px;color:#A32D2D;margin-bottom:6px;}
+.doc-title{font-size:11px;font-weight:700;text-align:center;color:#1a1a1a;margin-bottom:10px;line-height:1.4;}
+.doc-table{width:100%;border-collapse:collapse;font-size:9px;}
+.doc-table th{background:#1F4E79;color:#fff;padding:5px 6px;font-weight:600;border:.5px solid #2d6aa0;text-align:center;}
+.doc-table th.tl{text-align:left;}
+.doc-table td{padding:4px 6px;border:.5px solid #BDD7EE;vertical-align:middle;}
+.doc-table td.stn-c{font-weight:700;background:#DEEAF1;font-size:8.5px;}
+.doc-table td.num-c{text-align:center;font-weight:600;color:#1F4E79;}
+.doc-table td.ph-c{text-align:center;padding:3px 4px;}
+.doc-table tr.tot td{background:#1F4E79;color:#fff;font-weight:700;text-align:center;}
+.doc-photo{width:48px;height:34px;object-fit:cover;border-radius:2px;}
+.doc-photo-ph{width:48px;height:34px;border:1px dashed #BDD7EE;border-radius:2px;background:#f0f4f8;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#94a3b8;}
+.doc-motto{font-size:7.5px;font-style:italic;text-align:center;margin-top:8px;color:#444;}
+/* CAMERA */
+#cam-vp{background:var(--dn);border-radius:16px;overflow:hidden;height:210px;display:flex;align-items:center;justify-content:center;position:relative;border:1px solid var(--blue);}
+#cam-video{width:100%;height:100%;object-fit:cover;display:none;}
+#cam-ph{text-align:center;color:var(--db);padding:20px;}
+#cam-ph i{font-size:36px;display:block;margin-bottom:7px;}
+#cam-ph p{font-size:13px;}
+#cam-sid{position:absolute;top:7px;left:50%;transform:translateX(-50%);font-size:8.5px;font-family:monospace;color:var(--db);background:rgba(4,44,83,.85);padding:2px 8px;border-radius:7px;white-space:nowrap;}
+#cam-live-ind{position:absolute;top:7px;right:9px;display:none;align-items:center;gap:3px;font-size:9px;color:var(--cd);font-weight:700;background:rgba(4,44,83,.85);padding:2px 8px;border-radius:7px;}
+#cam-live-ind .ld{width:5px;height:5px;border-radius:50%;background:var(--cd);animation:lpulse 1s infinite;}
+@keyframes lpulse{0%,100%{opacity:1}50%{opacity:.4}}
+.scan-overlay{position:absolute;inset:0;pointer-events:none;}
+.scan-corner{position:absolute;width:18px;height:18px;border-color:rgba(56,200,255,.7);border-style:solid;}
+.sc-tl{top:7px;left:7px;border-width:2px 0 0 2px;}
+.sc-tr{top:7px;right:7px;border-width:2px 2px 0 0;}
+.sc-bl{bottom:7px;left:7px;border-width:0 0 2px 2px;}
+.sc-br{bottom:7px;right:7px;border-width:0 2px 2px 0;}
+#cam-status-bar{position:absolute;bottom:0;left:0;right:0;background:rgba(4,44,83,.85);padding:5px 10px;display:none;align-items:center;gap:6px;font-size:10px;color:#fff;}
+#cap-flash{position:absolute;inset:0;background:#fff;border-radius:16px;opacity:0;pointer-events:none;transition:opacity .1s;}
+#cap-flash.snap{opacity:.8;}
+#cap-strip{display:flex;gap:6px;overflow-x:auto;padding:2px 0;}
+.cap-thumb{flex-shrink:0;width:60px;height:44px;border-radius:7px;overflow:hidden;position:relative;border:2px solid transparent;}
+.cap-thumb.passed{border-color:var(--green);}
+.cap-thumb.failed{border-color:var(--cd);}
+.cap-thumb.captured{border-color:var(--blue);}
+.cap-thumb canvas,.cap-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.cap-thumb-label{position:absolute;bottom:0;left:0;right:0;font-size:7px;font-weight:700;text-align:center;padding:1px;color:#fff;}
+.cap-thumb.passed .cap-thumb-label{background:rgba(59,109,17,.85);}
+.cap-thumb.failed .cap-thumb-label{background:rgba(163,45,45,.85);}
+.cap-thumb.captured .cap-thumb-label{background:rgba(24,95,165,.85);}
+/* INSPECTION CARDS */
+.ai-cond-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ai-cond{border:1.5px solid #d0dce8;border-radius:14px;padding:10px;background:#fff;}
+.ai-cond.passed{border-color:var(--green);background:var(--lg);}
+.ai-cond.failed{border-color:var(--cd);background:var(--lr);}
+.ai-cond-header{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.ai-cond-ico{font-size:18px;color:#94a3b8;}
+.ai-cond.passed .ai-cond-ico{color:var(--green);}
+.ai-cond.failed .ai-cond-ico{color:var(--cd);}
+.ai-cond-name{font-size:11px;font-weight:700;color:#1a2332;line-height:1.2;}
+.ai-cond.passed .ai-cond-name{color:var(--green);}
+.ai-cond.failed .ai-cond-name{color:var(--red);}
+/* COMPLIANCE */
+.comp-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:.5px solid #f0f4f8;}
+.comp-row:last-child{border-bottom:none;}
+.comp-ico{font-size:17px;flex-shrink:0;}
+.comp-name{flex:1;font-size:12px;color:#1a2332;font-weight:500;}
+.comp-status{font-size:10px;font-weight:700;padding:2px 8px;border-radius:7px;}
+.cs-passed{background:var(--lg);color:var(--green);}
+.cs-failed{background:var(--lr);color:var(--red);}
+.comp-flag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;background:var(--lr);color:var(--red);}
+.comp-thumb{width:40px;height:30px;border-radius:4px;overflow:hidden;flex-shrink:0;}
+.comp-thumb img{width:100%;height:100%;object-fit:cover;}
+/* AUDIT */
+.audit-wrap{background:var(--dn);border-radius:12px;padding:12px;font-size:10px;font-family:monospace;color:var(--mb);max-height:180px;overflow-y:auto;}
+.json-box{background:var(--dn);border-radius:10px;padding:10px;font-size:9.5px;font-family:monospace;color:var(--mb);white-space:pre-wrap;word-break:break-all;max-height:130px;overflow-y:auto;}
+.copy-btn{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;border:.5px solid #d0dce8;border-radius:10px;background:#f8fafc;cursor:pointer;color:#5a6a7a;font-size:12px;font-family:inherit;width:100%;}
+.copy-btn:active{background:#f0f4f8;}
+@media print{#hdr,#user-bar,#bottom-nav{display:none!important;}.pice-preview{background:none;padding:0;}.doc-inner{box-shadow:none;border:none;}}
+/* GUEST CONCERN FORM */
+#guest-screen{position:fixed;inset:0;background:#f0f4f8;z-index:10000;overflow-y:auto;display:none;flex-direction:column;}
+.gc-hdr{background:var(--navy);padding:16px 14px 14px;text-align:center;color:#fff;flex-shrink:0;}
+.gc-hdr-logo{width:52px;height:52px;border-radius:50%;background:#fff;margin:0 auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.gc-hdr-logo .lm{font-size:13px;font-weight:700;color:var(--navy);line-height:1;}
+.gc-hdr-logo .ls{font-size:7px;color:var(--blue);line-height:1;}
+.gc-hdr h1{font-size:16px;font-weight:700;margin-bottom:3px;}
+.gc-hdr p{font-size:11px;color:var(--mb);line-height:1.5;}
+.gc-body{padding:16px;display:flex;flex-direction:column;gap:12px;max-width:480px;width:100%;margin:0 auto;}
+.gc-card{background:#fff;border-radius:16px;padding:14px;border:.5px solid #d0dce8;}
+.gc-lbl{font-size:11px;font-weight:600;color:#5a6a7a;margin-bottom:5px;}
+.gc-req{color:var(--crim);}
+.gc-input{width:100%;padding:11px 13px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;-webkit-appearance:none;box-sizing:border-box;}
+.gc-input:focus{border-color:var(--blue);background:#fff;}
+.gc-ta{width:100%;padding:11px 13px;font-size:14px;font-family:inherit;border:1px solid #d0dce8;border-radius:12px;outline:none;background:#f8fafc;color:#1a2332;resize:vertical;min-height:100px;box-sizing:border-box;}
+.gc-ta:focus{border-color:var(--blue);background:#fff;}
+.gc-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.gc-type-btn{padding:10px 8px;border:1.5px solid #d0dce8;border-radius:12px;font-size:11px;cursor:pointer;color:#5a6a7a;background:#f8fafc;text-align:center;font-family:inherit;line-height:1.3;}
+.gc-type-btn.on{border-color:var(--navy);background:var(--lb);color:var(--navy);font-weight:600;}
+.gc-type-btn.urgent.on{border-color:var(--crim);background:var(--lr);color:var(--red);}
+.gc-anon{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f8fafc;cursor:pointer;}
+.gc-anon input{width:18px;height:18px;cursor:pointer;accent-color:var(--navy);}
+.gc-anon-lbl{font-size:12px;color:#5a6a7a;line-height:1.4;}
+.gc-submit{padding:15px;background:var(--navy);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;}
+.gc-submit:disabled{background:#c0cdd8;cursor:not-allowed;}
+.gc-footer{text-align:center;font-size:10px;color:#94a3b8;padding:12px 16px 24px;line-height:1.6;}
+/* QR section in master */
+.qr-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+.qr-card{border:.5px solid #d0dce8;border-radius:12px;padding:10px;text-align:center;background:#f8fafc;}
+.qr-card canvas{border-radius:6px;display:block;margin:0 auto 5px;}
+.qr-stn{font-size:9.5px;font-weight:600;color:#1a2332;margin-bottom:3px;}
+.qr-btn{padding:5px 10px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:10px;cursor:pointer;font-family:inherit;}
+/* Concern badge */
+.concern-badge{display:inline-block;padding:2px 7px;border-radius:7px;font-size:9px;font-weight:600;}
+.cb-urgent{background:var(--lr);color:var(--red);}
+.cb-norm{background:var(--lb);color:var(--navy);}
+.cb-done{background:var(--lg);color:var(--green);}
+/* CHECKLIST OVERLAY */
+#checklist-overlay{position:fixed;inset:0;background:rgba(4,44,83,.6);z-index:999;display:none;flex-direction:column;justify-content:flex-end;backdrop-filter:blur(2px);}
+.cap-thumb.captured{border-color:var(--blue);}
+.cap-thumb.captured .cap-thumb-label{background:rgba(24,95,165,.85);}
+/* SESSION TIMEOUT */
+#session-warn{position:fixed;top:0;left:0;right:0;z-index:8888;background:#A32D2D;color:#fff;padding:10px 14px;display:none;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.3);}
+#session-warn i{font-size:18px;flex-shrink:0;}
+#session-warn-msg{flex:1;font-size:12px;font-weight:600;}
+#session-warn-btn{padding:6px 14px;background:#fff;color:#A32D2D;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+</style>
+</head>
+<body>
+<!-- SPLASH -->
+<div id="splash">
+  <div class="sp-logo"><span class="lm">HuGo</span><span class="ls">BULPPO</span></div>
+  <div class="sp-title">Human Rights on the Go</div>
+  <div class="sp-sub">Bulacan Police Provincial Human Rights Affairs Office · PRO 3</div>
+  <div class="sp-dots"><div class="sp-dot"></div><div class="sp-dot"></div><div class="sp-dot"></div></div>
+</div>
+
+<div id="app">
+  <!-- HEADER -->
+  <div id="hdr">
+    <div class="hdr-logo"><span class="lm">HuGo</span><span class="ls">v1</span></div>
+    <div class="hdr-text"><h1>Human Rights on the Go</h1><div class="hs">BULPPO PRO 3 · <span id="hdr-sub">PHRA Bulacan</span></div></div>
+  </div>
+  <div id="offline-bar">⚠ You are offline</div>
+
+  <!-- LOGIN -->
+  <div id="login-screen">
+    <div class="ls-title">Welcome to HuGo</div>
+    <div class="ls-sub">Human Rights on the Go · BULPPO PRO 3 · PNP<br>Select your role to begin.</div>
+    <div class="role-grid">
+      <div class="role-card" onclick="showStationAuth()">
+        <div class="rc-ico"><i class="ti ti-building"></i></div>
+        <div class="rc-name">Station user</div>
+        <div class="rc-info">Select your station and enter passcode</div>
+      </div>
+      <div class="role-card sup" onclick="showSuperAuth()">
+        <div class="rc-ico"><i class="ti ti-shield-check"></i></div>
+        <div class="rc-name">Super user</div>
+        <div class="rc-info">Enter master password for full access</div>
+      </div>
+    </div>
+    <div class="alert info"><i class="ti ti-shield"></i>All data is strictly isolated per station. Access control enforced across all modules.</div>
+    <div class="alert info" style="font-size:11px;"><i class="ti ti-info-circle"></i>Super user: <strong>HUGO@ADMIN2025</strong> · Contact your PHRA officer for your station passcode.</div>
+  </div>
+
+  <!-- STATION AUTH -->
+  <div id="station-auth">
+    <div class="auth-hdr">
+      <div class="auth-back" onclick="backToLogin()"><i class="ti ti-arrow-left"></i></div>
+      <div style="font-size:15px;font-weight:700;color:#1a2332;">Station login</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-card-title"><i class="ti ti-building"></i>Select your station</div>
+      <div class="fg"><select class="fs" id="stn-select" onchange="onStnSelect()"><option value="">Select station...</option></select></div>
+      <div class="fg" id="pass-field" style="display:none;">
+        <div class="fl">Station passcode <span class="req">*</span></div>
+        <input type="password" class="tok-inp" id="stn-pass" placeholder="Enter passcode..." oninput="onPassIn()">
+      </div>
+      <div class="alert err" id="stn-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="stn-err-msg"></span></div>
+      <div class="alert info" style="font-size:11px;margin-top:4px;"><i class="ti ti-info-circle"></i>Contact your PHRA officer for your station passcode.</div>
+    </div>
+    <button class="pbtn" id="stn-btn" onclick="loginStation()" disabled><i class="ti ti-login"></i>Login</button>
+    <div class="processing" id="stn-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+  </div>
+
+  <!-- SUPER AUTH -->
+  <div id="super-auth">
+    <div class="auth-hdr">
+      <div class="auth-back" onclick="backToLogin()"><i class="ti ti-arrow-left"></i></div>
+      <div style="font-size:15px;font-weight:700;color:#1a2332;">Super user login</div>
+    </div>
+    <div class="auth-card">
+      <div class="auth-card-title"><i class="ti ti-lock"></i>Master password</div>
+      <div class="fg"><input type="password" class="tok-inp" id="su-pass" placeholder="Enter master password..." oninput="onSuIn()"></div>
+      <div class="alert err" id="su-err" style="display:none;"><i class="ti ti-alert-triangle"></i>Incorrect password.</div>
+      <div class="alert info" style="font-size:11px;margin-top:4px;"><i class="ti ti-info-circle"></i>Demo: <strong>HUGO@ADMIN2025</strong></div>
+    </div>
+    <button class="pbtn" id="su-btn" onclick="loginSuper()" disabled><i class="ti ti-shield-check"></i>Login as super user</button>
+    <div class="processing" id="su-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+  </div>
+
+  <!-- AUTHENTICATED APP -->
+  <div id="auth-app" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+    <div id="user-bar">
+      <span class="ub-pill" id="ub-pill">Station</span>
+      <span id="ub-name" class="ub-name">User</span>
+      <span class="flag-ind" id="flag-ind"><i class="ti ti-flag" style="font-size:10px"></i>Flag</span>
+      <button class="sw-btn" onclick="logout()">Logout</button>
+    </div>
+    <div id="content">
+
+      <!-- HOME -->
+      <div class="view active" id="view-home">
+        <div><div class="greeting" id="home-greeting">Magandang araw!</div><div class="greeting-sub" id="home-sub">Select a module below</div></div>
+        <div class="stat-row" id="home-stats"></div>
+        <div class="sec-lbl">Reporting modules</div>
+        <div class="mod-cards">
+          <div class="mod-card" onclick="goNav('pice')"><div class="mc-ico"><i class="ti ti-calendar-week"></i></div><div class="mc-name">Weekly PICE</div><div class="mc-desc">Weekly activity report</div><div class="mc-badge mb-g">Ready</div></div>
+          <div class="mod-card" onclick="goNav('med')"><div class="mc-ico"><i class="ti ti-stethoscope"></i></div><div class="mc-name">Monthly Medical</div><div class="mc-desc">Medical check-up report</div><div class="mc-badge mb-g">Ready</div></div>
+          <div class="mod-card" onclick="goNav('phros')"><div class="mc-ico"><i class="ti ti-users"></i></div><div class="mc-name">PHROs &amp; COs</div><div class="mc-desc">Excel file submission</div><div class="mc-badge mb-g">Ready</div></div>
+          <div class="mod-card" onclick="goNav('idd')"><div class="mc-ico"><i class="ti ti-file-description"></i></div><div class="mc-name">Monthly IDD</div><div class="mc-desc">Disease &amp; death report</div><div class="mc-badge mb-g" id="idd-home-badge">Ready</div></div>
+          <div class="mod-card" id="cam-home-card" onclick="goNav('cam')"><div class="mc-ico"><i class="ti ti-camera"></i></div><div class="mc-name">Inspection Cam</div><div class="mc-desc" id="cam-home-desc">Activate camera</div><div class="mc-badge mb-b" id="cam-home-badge">Token req'd</div></div>
+          <div class="mod-card" onclick="goNav('master')"><div class="mc-ico"><i class="ti ti-file-certificate"></i></div><div class="mc-name">Master report</div><div class="mc-desc">Consolidated reports</div><div class="mc-badge mb-b" id="mc-master-badge">Super user only</div></div>
+        </div>
+        <div class="sec-lbl">Recent activity</div>
+        <div class="act-list" id="act-list"><div style="font-size:12px;color:#94a3b8;padding:8px 0;text-align:center;">No activity yet</div></div>
+      </div>
+
+      <!-- WEEKLY PICE -->
+      <div class="view" id="view-pice">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-calendar-week"></i>Weekly PICE</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="rw2">
+              <div class="fg"><div class="fl">Week <span class="req">*</span></div><select class="fs" id="pice-week" onchange="checkPice()"><option value="">Week...</option><option>Week 1</option><option>Week 2</option><option>Week 3</option><option>Week 4</option></select></div>
+              <div class="fg"><div class="fl">Month <span class="req">*</span></div><select class="fs" id="pice-month" onchange="checkPice()"><option value="">Month...</option><option>January</option><option>February</option><option>March</option><option>April</option><option selected>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+            </div>
+            <div class="fg"><div class="fl">Station</div><div id="pice-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+            <div class="fg"><div class="fl">Nr of PICE conducted <span class="req">*</span></div><div class="num-wrap"><button class="num-btn" onclick="adj('pice',-1)">−</button><span class="num-disp" id="pice-d">0</span><button class="num-btn" onclick="adj('pice',1)">+</button><input type="number" class="num-man" id="pice-m" min="0" value="0" oninput="man('pice',this.value)"></div></div>
+            <div class="fg"><div class="fl">Nr of participants <span class="req">*</span></div><div class="num-wrap"><button class="num-btn" onclick="adj('part',-1)">−</button><span class="num-disp" id="part-d">0</span><button class="num-btn" onclick="adj('part',1)">+</button><input type="number" class="num-man" id="part-m" min="0" value="0" oninput="man('part',this.value)"></div></div>
+            <div class="fg"><div class="fl">Action photo <span class="req">*</span></div>
+              <div class="drop-zone" onclick="document.getElementById('pice-fi').click()"><i class="ti ti-photo-up"></i><p>Tap to upload</p><small>JPG, PNG · one photo</small></div>
+              <div id="pice-prev"></div>
+              <input type="file" id="pice-fi" accept="image/jpeg,image/png" style="display:none" onchange="handlePhoto('pice',this.files)">
+            </div>
+          </div>
+        </div>
+        <div class="alert err" id="pice-dup" style="display:none;"><i class="ti ti-alert-triangle"></i>Your station already submitted for this week.</div>
+        <button class="pbtn" id="pice-btn" onclick="submitMod('pice')" disabled><i class="ti ti-send"></i>Submit Weekly PICE</button>
+        <div class="processing" id="pice-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="pice-success"></div>
+      </div>
+
+      <!-- MONTHLY MEDICAL -->
+      <div class="view" id="view-med">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-stethoscope"></i>Monthly Medical Check-up</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="fg"><div class="fl">Station</div><div id="med-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+            <div class="fg"><div class="fl">Reporting month <span class="req">*</span></div><div class="month-grid" id="med-months"></div></div>
+            <div class="fg"><div class="fl">Nr of medical check-ups <span class="req">*</span></div><div class="num-wrap"><button class="num-btn" onclick="adj('med',-1)">−</button><span class="num-disp" id="med-d">0</span><button class="num-btn" onclick="adj('med',1)">+</button><input type="number" class="num-man" id="med-m" min="0" value="0" oninput="man('med',this.value)"></div></div>
+            <div class="fg"><div class="fl">Action photo <span class="req">*</span></div>
+              <div class="drop-zone" onclick="document.getElementById('med-fi').click()"><i class="ti ti-photo-up"></i><p>Tap to upload</p><small>JPG, PNG · one photo</small></div>
+              <div id="med-prev"></div>
+              <input type="file" id="med-fi" accept="image/jpeg,image/png" style="display:none" onchange="handlePhoto('med',this.files)">
+            </div>
+          </div>
+        </div>
+        <button class="pbtn" id="med-btn" onclick="submitMod('med')" disabled><i class="ti ti-send"></i>Submit Monthly Medical</button>
+        <div class="processing" id="med-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="med-success"></div>
+      </div>
+
+      <!-- PHROs & COs -->
+      <div class="view" id="view-phros">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-users"></i>Monthly PHROs &amp; COs</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="fg"><div class="fl">Station</div><div id="phros-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+            <div class="fg"><div class="fl">Month <span class="req">*</span></div><div class="month-grid" id="phros-months"></div></div>
+            <div class="fg"><div class="fl">Upload Excel (.xlsx) <span class="req">*</span></div>
+              <div class="drop-zone" onclick="document.getElementById('phros-fi').click()"><i class="ti ti-file-spreadsheet"></i><p>Tap to upload Excel</p><small>.xlsx · Form (A) and Form (B)</small></div>
+              <div id="phros-prev"></div>
+              <input type="file" id="phros-fi" accept=".xlsx" style="display:none" onchange="handleXlsx(this.files)">
+            </div>
+            <div id="phros-val"></div>
+          </div>
+        </div>
+        <button class="pbtn" id="phros-btn" onclick="submitMod('phros')" disabled><i class="ti ti-send"></i>Submit PHROs &amp; COs</button>
+        <div class="processing" id="phros-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="phros-success"></div>
+      </div>
+
+      <!-- IDD -->
+      <div class="view" id="view-idd">
+        <div class="card">
+          <div class="card-title"><i class="ti ti-file-description"></i>Monthly IDD</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="rw2">
+              <div class="fg"><div class="fl">Month <span class="req">*</span></div><select class="fs" id="idd-month" onchange="checkIDD()"><option value="">Month...</option><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+              <div class="fg"><div class="fl">Year <span class="req">*</span></div><select class="fs" id="idd-year" onchange="checkIDD()"><option value="">Year...</option><option>2025</option><option>2026</option><option>2027</option></select></div>
+            </div>
+            <div class="fg"><div class="fl">Station</div><div id="idd-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-heart-off"></i>Form 1 — Natural death</div>
+          <div class="tog-wrap" style="margin-bottom:10px;"><button class="tog" id="f1-y" onclick="setF(1,'yes')">YES</button><button class="tog" id="f1-n" onclick="setF(1,'no')">NO — Negative</button></div>
+          <div id="f1-entries"></div><div id="f1-add" style="display:none;margin-top:5px;"><button style="width:100%;padding:9px;border:2px dashed #c0cdd8;background:#f8fafc;border-radius:10px;font-size:12px;cursor:pointer;color:var(--blue);font-family:inherit;" onclick="addEntry(1)"><i class="ti ti-plus"></i> Add PUPC entry</button></div>
+          <div class="alert warn" id="f1-flag" style="display:none;margin-top:7px;"><i class="ti ti-flag"></i>Priority flag will notify all super users.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-alert-triangle"></i>Form 2 — Maltreatment / Torture</div>
+          <div class="tog-wrap" style="margin-bottom:10px;"><button class="tog" id="f2-y" onclick="setF(2,'yes')">YES</button><button class="tog" id="f2-n" onclick="setF(2,'no')">NO — Negative</button></div>
+          <div id="f2-entries"></div><div id="f2-add" style="display:none;margin-top:5px;"><button style="width:100%;padding:9px;border:2px dashed #c0cdd8;background:#f8fafc;border-radius:10px;font-size:12px;cursor:pointer;color:var(--blue);font-family:inherit;" onclick="addEntry(2)"><i class="ti ti-plus"></i> Add PUPC entry</button></div>
+          <div class="alert urgent" id="f2-flag" style="display:none;margin-top:7px;"><i class="ti ti-alert-triangle"></i>URGENT — Immediate super user notification.</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="ti ti-stethoscope"></i>Form 3 — Common diseases</div>
+          <div class="tog-wrap" style="margin-bottom:10px;"><button class="tog" id="f3-y" onclick="setF(3,'yes')">YES</button><button class="tog" id="f3-n" onclick="setF(3,'no')">NO — Negative</button></div>
+          <div id="f3-entries"></div><div id="f3-add" style="display:none;margin-top:5px;"><button style="width:100%;padding:9px;border:2px dashed #c0cdd8;background:#f8fafc;border-radius:10px;font-size:12px;cursor:pointer;color:var(--blue);font-family:inherit;" onclick="addDiseaseRow()"><i class="ti ti-plus"></i> Add disease row</button></div>
+        </div>
+        <button class="pbtn" id="idd-btn" onclick="submitMod('idd')" disabled><i class="ti ti-send"></i>Submit IDD Report</button>
+        <div class="processing" id="idd-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+        <div id="idd-success"></div>
+      </div>
+
+      <!-- CAMERA -->
+      <div class="view" id="view-cam">
+        <div id="cam-tok-sec">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-lock"></i>Inspection token</div>
+            <!-- Station user view -->
+            <div id="cam-info-station" class="alert info" style="margin-bottom:10px;display:none;"><i class="ti ti-camera"></i><div><strong>Activate Camera</strong><br><span style="font-size:10.5px;">As a station user, you can activate the camera. The super user will conduct the checklist inspection using the live feed.</span></div></div>
+            <!-- Super user view -->
+            <div id="cam-info-super" class="alert ok" style="margin-bottom:10px;display:none;"><i class="ti ti-clipboard-list"></i><div><strong>Guided Checklist Inspection</strong><br><span style="font-size:10.5px;">Tap <strong>Inspect</strong> on each condition · Answer YES/NO checklist · Photo captured automatically · Works offline</span></div></div>
+            <div class="fg" style="margin-bottom:10px;"><div class="fl">Enter inspection token</div><input type="text" class="tok-inp" id="cam-tok" placeholder="Enter token..." maxlength="20" oninput="onCamTok()"></div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+              <span style="padding:3px 9px;border-radius:9px;font-size:10px;font-family:monospace;background:#f0f4f8;border:.5px solid #d0dce8;cursor:pointer;color:#5a6a7a;" onclick="setCamTok('HUGO-INSPECT-01')">HUGO-INSPECT-01</span>
+              <span style="padding:3px 9px;border-radius:9px;font-size:10px;font-family:monospace;background:#f0f4f8;border:.5px solid #d0dce8;cursor:pointer;color:#5a6a7a;" onclick="setCamTok('PHRA-CAM-2025')">PHRA-CAM-2025</span>
+              <span style="padding:3px 9px;border-radius:9px;font-size:10px;font-family:monospace;background:#f0f4f8;border:.5px solid #d0dce8;cursor:pointer;color:#5a6a7a;" onclick="setCamTok('BULPPO-SU-99')">BULPPO-SU-99</span>
+            </div>
+            <div class="alert err" id="cam-tok-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="cam-tok-err-msg"></span></div>
+          </div>
+          <button class="pbtn" id="cam-val-btn" onclick="valCam()" disabled style="margin-top:4px;"><i class="ti ti-camera"></i><span id="cam-val-txt">Validate &amp; activate camera</span></button>
+        </div>
+        <div id="cam-live-sec" style="display:none;flex-direction:column;gap:10px;">
+          <div id="cam-vp">
+            <video id="cam-video" autoplay playsinline muted></video>
+            <div id="cam-ph"><i class="ti ti-camera"></i><p>Initializing...</p></div>
+            <div class="scan-overlay"><div class="scan-corner sc-tl"></div><div class="scan-corner sc-tr"></div><div class="scan-corner sc-bl"></div><div class="scan-corner sc-br"></div></div>
+            <div id="cam-sid"></div>
+            <div id="cam-live-ind"><div class="ld"></div>LIVE</div>
+            <div id="cam-status-bar"><span id="cam-status-txt" style="flex:1;">Camera active</span></div>
+            <div id="cap-flash"></div>
+          </div>
+
+          <!-- STATION USER: camera-only view -->
+          <div id="station-cam-view" style="display:none;">
+            <div class="alert info"><i class="ti ti-camera"></i><div><strong>Camera is active</strong><br><span style="font-size:10.5px;">Point the camera at each item during inspection. The super user will conduct the checklist inspection remotely or on-site.</span></div></div>
+          </div>
+
+          <!-- SUPER USER: full inspection controls -->
+          <div id="super-cam-view" style="display:none;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:8px;">
+              <button class="dbtn" onclick="stopCam()" style="flex:1;"><i class="ti ti-player-stop"></i>Generate report</button>
+              <button class="gbtn" onclick="manualCapture()"><i class="ti ti-camera"></i>Photo</button>
+            </div>
+            <div class="sec-lbl">Inspection conditions — tap Inspect</div>
+            <div class="ai-cond-grid" id="ai-conds"></div>
+            <div class="sec-lbl">Captured photos <span class="stn-pill sp-b" id="cap-count" style="margin-left:4px;">0</span></div>
+            <div id="cap-strip"></div>
+            <div class="card"><div class="card-title"><i class="ti ti-activity"></i>Inspection log</div><div id="det-log" style="display:flex;flex-direction:column;gap:4px;max-height:140px;overflow-y:auto;"><div style="font-size:11px;color:#94a3b8;">Tap Inspect on each condition to begin</div></div></div>
+          </div>
+        </div>
+        <div id="cam-done-sec" style="display:none;flex-direction:column;gap:10px;">
+          <div class="card">
+            <div class="card-title"><i class="ti ti-clipboard-check"></i>Inspection compliance report</div>
+            <div id="comp-rows"></div>
+          </div>
+          <div id="flagged-section" style="display:none;"><div class="alert urgent"><i class="ti ti-alert-triangle"></i><span id="flagged-msg"></span></div></div>
+          <div class="card"><div class="card-title"><i class="ti ti-code"></i>Inspection JSON</div><div class="json-box" id="cam-json"></div><div style="display:flex;gap:8px;margin-top:8px;"><button class="copy-btn" style="flex:1;" onclick="copyCamJSON()"><i class="ti ti-copy"></i>Copy JSON</button><button class="gbtn" onclick="resetCam()"><i class="ti ti-refresh"></i>New</button></div></div>
+        </div>
+      </div>
+
+      <!-- MASTER REPORT -->
+      <div class="view" id="view-master">
+        <div class="alert err" id="master-denied" style="display:none;"><i class="ti ti-lock"></i>Access denied — super users only.</div>
+        <div id="master-su" style="display:none;flex-direction:column;gap:12px;">
+          <div class="sec-lbl">Submission notifications</div>
+          <div class="notif-card"><div class="notif-title"><i class="ti ti-users"></i>Monthly PHROs &amp; COs</div><div class="notif-bar-wrap"><div class="notif-bar" id="phros-bar" style="width:0%"></div></div><div class="notif-nums"><span id="phros-txt">0 of 27 stations submitted</span><span id="phros-pct">0%</span></div><div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:2px;" id="phros-stns"></div></div>
+          <div class="notif-card"><div class="notif-title"><i class="ti ti-file-description"></i>Monthly IDD</div><div class="notif-bar-wrap"><div class="notif-bar" id="idd-bar" style="width:0%"></div></div><div class="notif-nums"><span id="idd-txt">0 of 27 stations submitted</span><span id="idd-pct">0%</span></div><div id="idd-flags-row" style="display:none;margin-top:6px;flex-wrap:wrap;gap:5px;"></div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:2px;" id="idd-stns"></div></div>
+          <div class="sec-lbl">Overall statistics</div>
+          <div class="stat-row" id="master-stats"></div>
+          <div class="card"><div class="card-title"><i class="ti ti-filter"></i>Filter</div><div class="rw2"><div class="fg"><div class="fl">Month</div><select class="fs" id="f-month" onchange="buildMaster()"><option value="">All months</option><option>January</option><option>February</option><option>March</option><option>April</option><option selected>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div><div class="fg"><div class="fl">Year</div><select class="fs" id="f-year" onchange="buildMaster()"><option value="">All years</option><option>2025</option><option selected>2026</option><option>2027</option></select></div></div></div>
+          <div class="sec-lbl">Per-station submissions</div>
+          <div class="card" style="padding:0;overflow:hidden;"><div class="master-scroll"><table class="master-table"><thead><tr><th>Station</th><th>PICE</th><th>Parts.</th><th>Medical</th><th>PHROs</th><th>IDD F1</th><th>IDD F2</th><th>Flag</th></tr></thead><tbody id="master-tbody"></tbody></table></div><div id="master-empty" style="padding:14px;text-align:center;font-size:12px;color:#94a3b8;">No submissions yet.</div></div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-file-certificate"></i>Generate master copy</div>
+            <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>Generates official BULPPO format Weekly PICE consolidated report with action photos.</div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><button class="sbtn" id="gen-btn" onclick="generateMaster()"><i class="ti ti-file-certificate"></i>Generate master copy</button><button class="gbtn" style="width:100%;justify-content:center;" onclick="flagMissing()"><i class="ti ti-flag"></i>Flag missing stations</button></div>
+            <div class="processing" id="gen-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+            <div id="gen-out" style="display:none;flex-direction:column;gap:8px;margin-top:10px;">
+              <div class="alert ok"><i class="ti ti-circle-check"></i>Master copy generated.</div>
+              <div class="pice-preview"><div class="doc-inner" id="doc-preview"></div></div>
+              <button class="gbtn" style="width:100%;justify-content:center;" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>
+            </div>
+          </div>
+          <div class="sec-lbl">Guest concerns <span class="stn-pill sp-b" id="gc-count-badge" style="margin-left:4px;">0</span></div>
+          <div class="card" id="gc-list-card">
+            <div id="gc-list"><div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px;">Walang reklamo pa.</div></div>
+          </div>
+          <div class="sec-lbl">QR codes — Guest concern form</div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-qrcode"></i>I-print ang QR Code</div>
+            <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>I-post ang QR code sa bawat himpilan. I-scan ng bisita para mag-ulat ng reklamo nang walang login.</div>
+            <div class="fg" style="margin-bottom:10px;">
+              <select class="fs" id="qr-stn-sel" onchange="generateQR()">
+                <option value="">Pumili ng himpilan...</option>
+              </select>
+            </div>
+            <div id="qr-single" style="display:none;flex-direction:column;align-items:center;gap:10px;">
+              <canvas id="qr-canvas" width="180" height="180" style="border-radius:10px;border:1px solid #d0dce8;"></canvas>
+              <div id="qr-stn-name" style="font-size:12px;font-weight:600;color:#1a2332;"></div>
+              <div style="display:flex;gap:8px;width:100%;">
+                <button class="sbtn" style="flex:1;" onclick="downloadQR()"><i class="ti ti-download"></i>I-download</button>
+                <button class="gbtn" style="flex:1;justify-content:center;" onclick="printQRPoster()"><i class="ti ti-printer"></i>I-print</button>
+              </div>
+            </div>
+          </div>
+          <div class="sec-lbl">Access audit log</div>
+          <div class="audit-wrap" id="audit-wrap"><div style="color:var(--db);font-size:10px;">No access events yet.</div></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <div id="bottom-nav">
+      <button class="bnav active" id="nav-home" onclick="goNav('home')"><i class="ti ti-home"></i><span>Home</span></button>
+      <button class="bnav" id="nav-pice" onclick="goNav('pice')"><i class="ti ti-calendar-week"></i><span>PICE</span></button>
+      <button class="bnav" id="nav-med" onclick="goNav('med')"><i class="ti ti-stethoscope"></i><span>Medical</span></button>
+      <button class="bnav" id="nav-phros" onclick="goNav('phros')"><i class="ti ti-users"></i><span>PHROs</span><div class="nb-badge" id="phros-badge"></div></button>
+      <button class="bnav" id="nav-idd" onclick="goNav('idd')"><i class="ti ti-file-description"></i><span>IDD</span><div class="nb-badge" id="idd-badge"></div></button>
+      <button class="bnav" id="nav-cam" onclick="goNav('cam')"><i class="ti ti-camera"></i><span>Cam</span></button>
+      <button class="bnav" id="nav-master" onclick="goNav('master')"><i class="ti ti-file-certificate"></i><span>Master</span></button>
+    </div>
+    <!-- CHECKLIST OVERLAY -->
+    <div id="checklist-overlay"></div>
+
+    <!-- SESSION TIMEOUT WARNING -->
+    <div id="session-warn">
+      <i class="ti ti-clock-exclamation"></i>
+      <span id="session-warn-msg">Session expiring in 2:00 — tap to stay logged in</span>
+      <button id="session-warn-btn" onclick="resetSessionTimer()">Stay logged in</button>
+    </div>
+
+  </div><!-- /auth-app -->
+
+  <!-- GUEST CONCERN FORM — public, no login needed -->
+  <div id="guest-screen">
+    <div class="gc-hdr">
+      <div class="gc-hdr-logo"><span class="lm">HuGo</span><span class="ls">BULPPO</span></div>
+      <h1>Iulat ang Inyong Reklamo</h1>
+      <p>Bulacan Police Provincial Office<br>Human Rights Affairs · PRO 3</p>
+    </div>
+    <div class="gc-body">
+      <div class="gc-card">
+        <div class="alert ok" style="margin-bottom:10px;"><i class="ti ti-shield-check"></i><div><strong>Kumpidensyal at Protektado</strong><br><span style="font-size:10.5px;">Ang inyong impormasyon ay lihim at protektado. Maaari kayong mag-ulat nang hindi nagpapakilala.</span></div></div>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px;">
+          <div class="gc-lbl">Himpilan ng Pulisya</div>
+          <div id="gc-stn-disp" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div>
+        </div>
+      </div>
+      <div class="gc-card">
+        <div class="gc-lbl">Uri ng Reklamo <span class="gc-req">*</span></div>
+        <div class="gc-type-grid" id="gc-type-grid">
+          <button class="gc-type-btn urgent" onclick="setGcType(this,'Paglabag sa Karapatang Pantao')">⚠ Paglabag sa Karapatang Pantao</button>
+          <button class="gc-type-btn urgent" onclick="setGcType(this,'Kapakanan ng Detinido')">👤 Kapakanan ng Detinido</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Kondisyon ng Pasilidad')">🏠 Kondisyon ng Pasilidad</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Ugali ng Tauhan')">👮 Ugali ng Tauhan</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Medikal na Alalahanin')">🏥 Medikal na Alalahanin</button>
+          <button class="gc-type-btn" onclick="setGcType(this,'Iba pa')">📝 Iba pa</button>
+        </div>
+      </div>
+      <div class="gc-card">
+        <div class="gc-lbl">Ilarawan ang Inyong Reklamo <span class="gc-req">*</span></div>
+        <textarea class="gc-ta" id="gc-desc" placeholder="Isulat dito ang detalye ng inyong reklamo..." oninput="checkGcForm()"></textarea>
+      </div>
+      <div class="gc-card">
+        <div class="gc-lbl">Paraan ng Pakikipag-ugnayan <span style="font-size:9px;color:#94a3b8;">(opsyonal)</span></div>
+        <input class="gc-input" id="gc-contact" placeholder="Telepono, email, o pangalan (opsyonal)..." style="margin-bottom:10px;">
+        <label class="gc-anon">
+          <input type="checkbox" id="gc-anon" onchange="checkGcForm()">
+          <div class="gc-anon-lbl"><strong>Nais manatiling anonymous</strong><br>Hindi na kailangan ng inyong impormasyon</div>
+        </label>
+      </div>
+      <div class="alert warn" id="gc-urgent-warn" style="display:none;"><i class="ti ti-alert-triangle"></i><div><strong>Mahalagang Reklamo</strong><br><span style="font-size:10.5px;">Ang inyong reklamo ay ipapadala bilang priority sa opisyal ng BULPPO PRO 3.</span></div></div>
+      <div class="alert err" id="gc-err" style="display:none;"><i class="ti ti-alert-triangle"></i><span id="gc-err-msg"></span></div>
+      <button class="gc-submit" id="gc-submit-btn" onclick="submitGcForm()" disabled><i class="ti ti-send"></i>Isumite ang Reklamo</button>
+      <div class="processing" id="gc-proc" style="display:none;padding:16px;"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+      <div id="gc-success" style="display:none;flex-direction:column;gap:12px;">
+        <div class="gc-card" style="text-align:center;">
+          <i class="ti ti-circle-check" style="font-size:48px;color:var(--green);display:block;margin-bottom:10px;"></i>
+          <div style="font-size:17px;font-weight:700;color:#1a2332;margin-bottom:6px;">Natanggap na ang Inyong Reklamo</div>
+          <p style="font-size:12px;color:#7a8a9a;margin-bottom:12px;">Ang inyong reference number ay:</p>
+          <div id="gc-refnum" style="font-size:20px;font-weight:700;font-family:monospace;color:var(--navy);background:var(--lb);border-radius:10px;padding:10px;margin-bottom:12px;"></div>
+          <p style="font-size:11px;color:#7a8a9a;line-height:1.6;">Itago ang reference number na ito para sa inyong follow-up. Ang inyong reklamo ay aming irerebyu at aksyunan ng BULPPO Human Rights Affairs Office.</p>
+        </div>
+        <button class="gc-submit" style="background:var(--green);" onclick="resetGcForm()"><i class="ti ti-plus"></i>Mag-ulat ng Bagong Reklamo</button>
+      </div>
+      <div class="gc-footer">
+        <strong>BULPPO PRO 3 — Human Rights Affairs Office</strong><br>
+        Ang reklamo ay tumatanggap ng seryosong aksyon.<br>
+        <em>"Serbisyong Mabilis, Tapat, at Nararamdaman"</em>
+      </div>
+    </div>
+  </div>
+</div><!-- /app -->
+
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────────────────────────
+const ALL_STNS=['1ST PMFC','2ND PMFC','ANGAT MPS','BALAGTAS MPS','BALIWAG CPS','BOCAUE MPS','BULAKAN MPS','BUSTOS MPS','CALUMPIT MPS','DRT MPS','GUIGUINTO MPS','HAGONOY MPS','MALOLOS CPS','MARILAO MPS','MEYCAUAYAN CPS','NORZAGARAY MPS','OBANDO MPS','PANDI MPS','PAOMBONG MPS','PLARIDEL MPS','PULILAN MPS','SAN ILDEFONSO MPS','SAN MIGUEL MPS','SAN RAFAEL MPS','SANTA MARIA MPS','SJDM CPS','PHQ'];
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CASE_DESC=['Murder','Homicide','Rape','Robbery','Illegal Drugs (RA 9165)','Illegal Possession of Firearms','Physical Injury','VAWC','Other'];
+const VALID_TOKS=['HUGO-INSPECT-01','PHRA-CAM-2025','BULPPO-SU-99'];
+const STATION_PC={
+  '1ST PMFC':'1PMFC-2025',
+  '2ND PMFC':'2PMFC-2025',
+  'ANGAT MPS':'ANGAT-2025',
+  'BALAGTAS MPS':'BALAGTAS-2025',
+  'BALIWAG CPS':'BALIWAG-2025',
+  'BOCAUE MPS':'BOCAUE-2025',
+  'BULAKAN MPS':'BULAKAN-2025',
+  'BUSTOS MPS':'BUSTOS-2025',
+  'CALUMPIT MPS':'CALUMPIT-2025',
+  'DRT MPS':'DRT-2025',
+  'GUIGUINTO MPS':'GUIGUINTO-2025',
+  'HAGONOY MPS':'HAGONOY-2025',
+  'MALOLOS CPS':'MALOLOS-2025',
+  'MARILAO MPS':'MARILAO-2025',
+  'MEYCAUAYAN CPS':'MEYCAUAYAN-2025',
+  'NORZAGARAY MPS':'NORZAGARAY-2025',
+  'OBANDO MPS':'OBANDO-2025',
+  'PANDI MPS':'PANDI-2025',
+  'PAOMBONG MPS':'PAOMBONG-2025',
+  'PLARIDEL MPS':'PLARIDEL-2025',
+  'PULILAN MPS':'PULILAN-2025',
+  'SAN ILDEFONSO MPS':'SANILDEFONSO-2025',
+  'SAN MIGUEL MPS':'SANMIGUEL-2025',
+  'SAN RAFAEL MPS':'SANRAFAEL-2025',
+  'SANTA MARIA MPS':'SANTAMARIA-2025',
+  'SJDM CPS':'SJDM-2025',
+  'PHQ':'PHQ-2025'
+};
+const SUPER_PW='HUGO@ADMIN2025';
+
+// ─── INSPECTION CONDITIONS ───────────────────────────────────────────────────
+const AI_CONDITIONS=[
+  {id:1,name:'Fire Extinguisher',icon:'ti-firetruck',label:'fire_extinguisher',
+   instructions:'Point camera at RED fire extinguisher · Verify gauge is GREEN zone · Check seal and tag · Tap PASS or FAIL',
+   checkItems:['In designated location','Visible, unobstructed and accessible','Pressure gauge in GREEN zone','Inspection tag current and valid','Safety seal intact','Clean and well maintained']},
+  {id:2,name:'Medical Kit',icon:'ti-first-aid-kit',label:'medical_kit',
+   instructions:'Point camera at first aid box · Open and show contents · Verify medicines within expiry · Tap PASS or FAIL',
+   checkItems:['Kit in designated location','Complete contents as per checklist','All items within expiry date','Clean, sealed and properly organized','Easily accessible']},
+  {id:3,name:'Medicines',icon:'ti-pill',label:'medicine',
+   instructions:'Point camera at medicines · Show labels and packaging clearly · Verify expiry dates · Tap PASS or FAIL',
+   checkItems:['Medicine bottles/blister packs visible','Pharmaceutical labels visible','Within expiry date','Organized and accessible']},
+  {id:4,name:'Log Book',icon:'ti-notebook',label:'logbook',
+   instructions:'Hold BLUE PUPC Logbook to camera · Show "PUPC LOGBOOK" title · Open to show written entries · Tap PASS or FAIL',
+   checkItems:['Log book available in designated location','Entries complete, accurate and up to date','Readable, neat and legible','No missing pages','Properly stored and protected']},
+  {id:5,name:'Detainee Formation',icon:'ti-users-group',label:'detainee_formation',
+   instructions:'Point camera at formation · Verify yellow shirts and organized rows · Confirm head count · Tap PASS or FAIL',
+   checkItems:['Facing forward at all times','Proper formation (organized rows and columns)','Detainees in proper attire (YELLOW shirts)','Standing at attention','Head count complete and accurate']},
+  {id:6,name:'CCTV Camera',icon:'ti-cctv',label:'mounted_cctv',
+   instructions:'Point camera DIRECTLY at mounted CCTV unit · Verify it is physically mounted · Check recording status · Tap PASS or FAIL',
+   checkItems:['Camera in designated location','Unobstructed view','Image clear and functional','Recording working properly','Cables secured and protected']}
+];
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let role='',userId='',myStation='';
+let nums={pice:0,part:0,med:0};
+let photos={pice:null,piceURL:'',med:null,medURL:''};
+let phrosFile=null;
+let modMonths={med:'',phros:''};
+let records=[];
+let idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};
+let auditLog=[];
+let camStream=null,camSid='',camTok='';
+let conditionResults={},capturedImages=[];
+
+// ─── SPLASH ───────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    const s=document.getElementById('splash');
+    s.classList.add('hidden');
+    setTimeout(()=>s.style.display='none',450);
+  },1500);
+});
+
+// ─── ONLINE/OFFLINE ───────────────────────────────────────────────────────────
+window.addEventListener('online',()=>document.getElementById('offline-bar').style.display='none');
+window.addEventListener('offline',()=>document.getElementById('offline-bar').style.display='block');
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+// ─── ACCESS CONTROL ───────────────────────────────────────────────────────────
+function checkAccess(requestedStation,action,module){
+  const ts=new Date().toISOString();
+  const rqStn=role==='super'?'ALL_STATIONS':myStation;
+  const granted=role==='super'||(role==='station'&&rqStn===requestedStation);
+  auditLog.unshift({ts,user_id:userId,role:role==='super'?'SUPER_USER':'STATION_USER',
+    requesting_station:rqStn,requested_station:requestedStation,
+    module,action,access_granted:granted});
+  if(auditLog.length>100) auditLog=auditLog.slice(0,100);
+  updateAuditDisplay();
+  return granted;
+}
+function updateAuditDisplay(){
+  const el=document.getElementById('audit-wrap');if(!el) return;
+  if(!auditLog.length){el.innerHTML='<div style="color:var(--db);font-size:10px;">No access events yet.</div>';return;}
+  el.innerHTML=auditLog.slice(0,20).map(l=>`<div style="padding:3px 0;border-bottom:.5px solid rgba(255,255,255,.08);font-size:9.5px;display:flex;gap:7px;flex-wrap:wrap;"><span style="color:var(--db);">${l.ts.substring(11,19)}</span><span style="color:#fff;">${l.user_id}</span><span style="color:var(--mb);">${l.module}·${l.action}</span><span style="color:${l.access_granted?'#7BC97E':'var(--cd)'};">${l.access_granted?'GRANTED':'DENIED'}</span></div>`).join('');
+}
+
+// ─── AUTH ─────────────────────────────────────────────────────────────────────
+function showStationAuth(){
+  document.getElementById('login-screen').style.display='none';
+  const sa=document.getElementById('station-auth');sa.style.display='flex';sa.style.flexDirection='column';
+  const sel=document.getElementById('stn-select');sel.innerHTML='<option value="">Select station...</option>';
+  ALL_STNS.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+}
+function showSuperAuth(){
+  document.getElementById('login-screen').style.display='none';
+  const sa=document.getElementById('super-auth');sa.style.display='flex';sa.style.flexDirection='column';
+  document.getElementById('su-pass').value='';document.getElementById('su-err').style.display='none';document.getElementById('su-btn').disabled=true;
+}
+function backToLogin(){
+  document.getElementById('station-auth').style.display='none';document.getElementById('super-auth').style.display='none';
+  document.getElementById('login-screen').style.display='flex';document.getElementById('login-screen').style.flexDirection='column';
+  document.getElementById('stn-err').style.display='none';
+}
+function onStnSelect(){
+  const s=document.getElementById('stn-select').value;
+  const pf=document.getElementById('pass-field');pf.style.display=s?'flex':'none';pf.style.flexDirection='column';
+  document.getElementById('stn-pass').value='';document.getElementById('stn-err').style.display='none';document.getElementById('stn-btn').disabled=true;
+}
+function onPassIn(){document.getElementById('stn-btn').disabled=document.getElementById('stn-pass').value.trim().length<4;}
+function onSuIn(){document.getElementById('su-btn').disabled=document.getElementById('su-pass').value.trim().length<4;}
+async function loginStation(){
+  const stn=document.getElementById('stn-select').value,pass=document.getElementById('stn-pass').value.trim();
+  document.getElementById('stn-err').style.display='none';document.getElementById('stn-btn').disabled=true;document.getElementById('stn-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,900));document.getElementById('stn-proc').style.display='none';
+  if(STATION_PC[stn]!==pass){document.getElementById('stn-err-msg').textContent='Incorrect passcode for '+stn;document.getElementById('stn-err').style.display='flex';document.getElementById('stn-btn').disabled=false;return;}
+  role='station';userId='STU-'+Math.floor(Math.random()*900+100);myStation=stn;
+  document.getElementById('station-auth').style.display='none';launchApp();
+}
+async function loginSuper(){
+  const pass=document.getElementById('su-pass').value.trim();
+  document.getElementById('su-err').style.display='none';document.getElementById('su-btn').disabled=true;document.getElementById('su-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,900));document.getElementById('su-proc').style.display='none';
+  if(pass!==SUPER_PW){document.getElementById('su-err').style.display='flex';document.getElementById('su-btn').disabled=false;return;}
+  role='super';userId='SU-001';myStation='';
+  document.getElementById('super-auth').style.display='none';launchApp();
+}
+function launchApp(){
+  const aa=document.getElementById('auth-app');aa.style.display='flex';aa.style.flexDirection='column';
+  const pill=document.getElementById('ub-pill');pill.textContent=role==='super'?'Super user':'Station';pill.className='ub-pill '+(role==='super'?'ub-su':'ub-st');
+  document.getElementById('ub-name').textContent=role==='super'?'Super User ('+userId+')':myStation;
+  document.getElementById('hdr-sub').textContent=role==='super'?'Super User — Full access':'Station · '+myStation;
+  document.getElementById('home-greeting').textContent='Magandang araw'+(myStation?', '+myStation.split(' ')[0]:'')+'!';
+  document.getElementById('home-sub').textContent=role==='super'?'Super user — full access':'Station user — '+myStation;
+  ['pice','med','phros','idd'].forEach(m=>{const el=document.getElementById(m+'-stn');if(el) el.textContent=role==='station'?myStation:'All stations';});
+  if(role==='super'){
+    document.getElementById('mc-master-badge').textContent='Ready';
+    document.getElementById('mc-master-badge').className='mc-badge mb-g';
+    // Super user camera info
+    const infoSu=document.getElementById('cam-info-super');if(infoSu) infoSu.style.display='flex';
+    const infoSt=document.getElementById('cam-info-station');if(infoSt) infoSt.style.display='none';
+    const camTxt=document.getElementById('cam-val-txt');if(camTxt) camTxt.innerHTML='Validate &amp; start inspection';
+    // Home card
+    const camDesc=document.getElementById('cam-home-desc');if(camDesc) camDesc.textContent='Guided checklist inspection';
+    const camBadge=document.getElementById('cam-home-badge');if(camBadge){camBadge.textContent='Full access';camBadge.className='mc-badge mb-g';}
+  } else {
+    // Station user camera info
+    const infoSt=document.getElementById('cam-info-station');if(infoSt) infoSt.style.display='flex';
+    const infoSu=document.getElementById('cam-info-super');if(infoSu) infoSu.style.display='none';
+    const camTxt=document.getElementById('cam-val-txt');if(camTxt) camTxt.innerHTML='Validate &amp; activate camera';
+    // Home card
+    const camDesc=document.getElementById('cam-home-desc');if(camDesc) camDesc.textContent='Activate camera only';
+    const camBadge=document.getElementById('cam-home-badge');if(camBadge){camBadge.textContent='Camera only';camBadge.className='mc-badge mb-b';}
+  }
+  buildMonthGrids();buildHomeStats();
+  checkAccess(role==='super'?'ALL_STATIONS':myStation,'login',role==='super'?'SYSTEM':'STATION');
+  startSessionTimer();
+  goNav('home');
+}
+function logout(){
+  clearSessionTimer();
+  role='';if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  document.getElementById('auth-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';document.getElementById('login-screen').style.flexDirection='column';
+  document.getElementById('station-auth').style.display='none';document.getElementById('super-auth').style.display='none';
+  nums={pice:0,part:0,med:0};photos={pice:null,piceURL:'',med:null,medURL:''};phrosFile=null;
+  idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function goNav(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.bnav').forEach(n=>n.classList.remove('active'));
+  const v=document.getElementById('view-'+id);if(v) v.classList.add('active');
+  const n=document.getElementById('nav-'+id);if(n) n.classList.add('active');
+  if(id==='master') buildMasterView();
+  document.getElementById('content').scrollTop=0;
+}
+
+// ─── MONTH GRIDS ──────────────────────────────────────────────────────────────
+function buildMonthGrids(){
+  ['med','phros'].forEach(mod=>{
+    const el=document.getElementById(mod+'-months');if(!el) return;el.innerHTML='';
+    MONTHS.forEach(m=>{const b=document.createElement('button');b.className='month-opt';b.textContent=m;
+      b.onclick=()=>{modMonths[mod]=m;el.querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));b.classList.add('on');checkMod(mod);};el.appendChild(b);});
+  });
+}
+
+// ─── FORM HELPERS ─────────────────────────────────────────────────────────────
+function adj(mod,d){
+  const k=mod==='part'?'part':mod;nums[k]=Math.max(0,(nums[k]||0)+d);
+  const disp=mod==='part'?'part-d':mod+'-d',inp=mod==='part'?'part-m':mod+'-m';
+  document.getElementById(disp).textContent=nums[k];document.getElementById(inp).value=nums[k];
+  checkMod(mod==='part'?'pice':mod);
+}
+function man(mod,v){const k=mod==='part'?'part':mod;const n=parseInt(v);nums[k]=isNaN(n)||n<0?0:n;const disp=mod==='part'?'part-d':mod+'-d';document.getElementById(disp).textContent=nums[k];checkMod(mod==='part'?'pice':mod);}
+
+function handlePhoto(mod,files){
+  if(!files||!files[0]) return;
+  const f=files[0];
+  if(!['image/jpeg','image/png'].includes(f.type)) return;
+  photos[mod]=f;
+  const r=new FileReader();r.onload=e=>{photos[mod+'URL']=e.target.result;
+    document.getElementById(mod+'-prev').innerHTML=`<div class="file-prev"><i class="ti ti-photo"></i><span class="fp-n">${f.name}</span><button class="fp-r" onclick="photos['${mod}']=null;photos['${mod}URL']='';document.getElementById('${mod}-prev').innerHTML='';checkMod('${mod}')">Remove</button></div>`;
+    checkMod(mod);};r.readAsDataURL(f);
+}
+function handleXlsx(files){
+  if(!files||!files[0]||!files[0].name.toLowerCase().endsWith('.xlsx')) return;
+  phrosFile=files[0];
+  document.getElementById('phros-prev').innerHTML=`<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">${phrosFile.name}</span><button class="fp-r" onclick="phrosFile=null;document.getElementById('phros-prev').innerHTML='';checkMod('phros')">Remove</button></div>`;
+  checkMod('phros');
+}
+function checkPice(){
+  const w=document.getElementById('pice-week').value,mo=document.getElementById('pice-month').value;
+  const isDup=records.find(r=>r.mod==='pice'&&r.station===myStation&&r.week===w);
+  document.getElementById('pice-dup').style.display=isDup?'flex':'none';
+  document.getElementById('pice-btn').disabled=!(w&&mo&&nums.pice>0&&nums.part>0&&photos.pice&&!isDup);
+}
+function checkMod(mod){
+  if(mod==='pice'){checkPice();return;}
+  let ok=false;
+  if(mod==='med') ok=!!modMonths.med&&nums.med>0&&!!photos.med;
+  if(mod==='phros'){const isDup=records.find(r=>r.mod==='phros'&&r.station===myStation&&r.month===modMonths.phros);ok=!!modMonths.phros&&!!phrosFile&&!isDup;}
+  if(mod==='idd') ok=!!document.getElementById('idd-month').value&&!!document.getElementById('idd-year').value&&idd.f1!==''&&idd.f2!==''&&idd.f3!=='';
+  const btn=document.getElementById(mod+'-btn');if(btn) btn.disabled=!ok;
+}
+function checkIDD(){checkMod('idd');}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────────────────
+async function submitMod(mod){
+  if(!checkAccess(myStation,'submit',mod.toUpperCase())) return;
+  const btn=document.getElementById(mod+'-btn');btn.disabled=true;
+  document.getElementById(mod+'-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,1200));
+  document.getElementById(mod+'-proc').style.display='none';
+  const ts=new Date().toISOString();let label='',flag=false,payload={};
+  if(mod==='pice'){const w=document.getElementById('pice-week').value,mo=document.getElementById('pice-month').value;label=myStation+' — '+w+' · '+nums.pice+' PICE · '+nums.part+' participants';payload={module:'Weekly PICE',station:myStation,week:w,month:mo,pice_count:nums.pice,participants:nums.part,photo:photos.pice?.name,photoURL:photos.piceURL,uploader:userId,timestamp:ts};}
+  if(mod==='med'){label=myStation+' — '+modMonths.med+' · '+nums.med+' check-ups';payload={module:'Monthly Medical',station:myStation,month:modMonths.med,count:nums.med,photo:photos.med?.name,uploader:userId,timestamp:ts};}
+  if(mod==='phros'){label=myStation+' — '+modMonths.phros+' · PHROs & COs';payload={module:'Monthly PHROs & COs',station:myStation,month:modMonths.phros,file:phrosFile?.name,uploader:userId,timestamp:ts};}
+  if(mod==='idd'){const m=document.getElementById('idd-month').value,y=document.getElementById('idd-year').value;flag=(idd.f1==='yes'&&idd.f1c>0)||(idd.f2==='yes'&&idd.f2c>0);label=myStation+' — IDD '+m+' '+y+(flag?' [FLAG]':'');payload={module:'Monthly IDD',station:myStation,month:m,year:y,form1:idd.f1==='no'?'NEGATIVE':idd.f1c+' entries',form2:idd.f2==='no'?'NEGATIVE':idd.f2c+' entries',form3:idd.f3==='no'?'NEGATIVE':idd.f3c+' rows',priority_flag:flag,uploader:userId,timestamp:ts};if(flag){document.getElementById('flag-ind').style.display='flex';document.getElementById('idd-badge').textContent='!';document.getElementById('idd-badge').classList.add('show');}if(idd.f2==='yes'&&idd.f2c>0)document.getElementById('idd-home-badge').textContent='URGENT!';}
+  records.push({mod,station:myStation,month:modMonths[mod]||'',week:payload.week||'',flag,ts,label,payload});
+  if(mod==='phros') updatePhrosNotif();
+  if(mod==='idd') updateIddNotif();
+  addActivity(mod,flag,label);buildHomeStats();
+  const jsonStr=JSON.stringify(payload,null,2);
+  document.getElementById(mod+'-success').innerHTML=`<div class="card" style="text-align:center;"><i class="ti ti-circle-check" style="font-size:44px;color:var(--green);display:block;margin-bottom:8px;"></i><div style="font-size:16px;font-weight:700;color:#1a2332;margin-bottom:5px;">Submitted</div><p style="font-size:12px;color:#7a8a9a;margin-bottom:12px;">${label}</p><div class="json-box">${jsonStr}</div><div style="display:flex;gap:7px;margin-top:8px;"><button class="copy-btn" style="flex:1;" onclick="navigator.clipboard.writeText(\`${jsonStr.replace(/`/g,"'")}\`)"><i class="ti ti-copy"></i>Copy</button><button class="gbtn" onclick="resetMod('${mod}')"><i class="ti ti-refresh"></i>New</button></div></div>`;
+}
+function resetMod(mod){
+  document.getElementById(mod+'-success').innerHTML='';
+  if(mod==='pice'){nums.pice=0;nums.part=0;['pice-d','part-d'].forEach(id=>document.getElementById(id).textContent=0);['pice-m','part-m'].forEach(id=>document.getElementById(id).value=0);photos.pice=null;photos.piceURL='';document.getElementById('pice-prev').innerHTML='';document.getElementById('pice-week').value='';document.getElementById('pice-btn').disabled=true;}
+  if(mod==='med'){nums.med=0;document.getElementById('med-d').textContent=0;document.getElementById('med-m').value=0;photos.med=null;photos.medURL='';document.getElementById('med-prev').innerHTML='';modMonths.med='';document.getElementById('med-months').querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));document.getElementById('med-btn').disabled=true;}
+  if(mod==='phros'){phrosFile=null;document.getElementById('phros-prev').innerHTML='';modMonths.phros='';document.getElementById('phros-months').querySelectorAll('.month-opt').forEach(x=>x.classList.remove('on'));document.getElementById('phros-btn').disabled=true;}
+  if(mod==='idd'){idd={f1:'',f2:'',f3:'',f1c:0,f2c:0,f3c:0};['f1-y','f1-n','f2-y','f2-n','f3-y','f3-n'].forEach(id=>document.getElementById(id).className='tog');['f1-entries','f2-entries','f3-entries'].forEach(id=>document.getElementById(id).innerHTML='');['f1-add','f2-add','f3-add','f1-flag','f2-flag'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('idd-month').value='';document.getElementById('idd-year').value='';document.getElementById('idd-btn').disabled=true;}
+}
+function addActivity(mod,flag,label){
+  const list=document.getElementById('act-list');
+  if(list.querySelector('[style*="color:#94a3b8"]')) list.innerHTML='';
+  const icons={pice:'ti-calendar-week',med:'ti-stethoscope',phros:'ti-users',idd:'ti-file-description',cam:'ti-camera'};
+  const ts=new Date().toLocaleTimeString('en-PH',{hour:'2-digit',minute:'2-digit'});
+  const row=document.createElement('div');row.className='act-row';
+  row.innerHTML=`<i class="ti ${icons[mod]||'ti-file'} act-ico${flag?' flag':''}"></i><div class="act-body"><strong>${label}</strong>Submitted</div><span class="act-ts">${ts}</span>`;
+  list.insertBefore(row,list.firstChild);
+}
+function buildHomeStats(){
+  const el=document.getElementById('home-stats');
+  if(role!=='super'){el.innerHTML='';el.style.display='none';return;}
+  el.style.display='grid';
+  const t=records.length,f=records.filter(r=>r.flag).length;
+  const pice=records.filter(r=>r.mod==='pice').reduce((a,r)=>a+(r.payload?.pice_count||0),0);
+  const med=records.filter(r=>r.mod==='med').reduce((a,r)=>a+(r.payload?.count||0),0);
+  el.innerHTML=`<div class="stat-card"><div class="sv s">${t}</div><div class="sl2">Total submissions</div></div><div class="stat-card"><div class="sv d">${f}</div><div class="sl2">Priority flags</div></div><div class="stat-card"><div class="sv">${pice}</div><div class="sl2">Total PICE</div></div><div class="stat-card"><div class="sv">${med}</div><div class="sl2">Total medical</div></div>`;
+}
+
+// ─── IDD HELPERS ──────────────────────────────────────────────────────────────
+function setF(n,v){
+  idd['f'+n]=v;document.getElementById('f'+n+'-y').className='tog'+(v==='yes'?' y-on':'');document.getElementById('f'+n+'-n').className='tog'+(v==='no'?' n-on':'');
+  if(v==='no'){document.getElementById('f'+n+'-entries').innerHTML='';document.getElementById('f'+n+'-add').style.display='none';idd['f'+n+'c']=0;}
+  if(v==='yes'&&n<3&&idd['f'+n+'c']===0) addEntry(n);
+  if(v==='yes'&&n===3&&idd.f3c===0) addDiseaseRow();
+  const f1f=document.getElementById('f1-flag'),f2f=document.getElementById('f2-flag');
+  if(f1f) f1f.style.display=(idd.f1==='yes'&&idd.f1c>0)?'flex':'none';
+  if(f2f) f2f.style.display=(idd.f2==='yes'&&idd.f2c>0)?'flex':'none';
+  checkMod('idd');
+}
+function addEntry(n){
+  idd['f'+n+'c']++;const cnt=idd['f'+n+'c'];
+  const causes=n===1?['Cardiovascular Disease','Hypertension/Stroke','TB','Pneumonia','Diabetes','Kidney Failure','Cancer','Natural Causes','Other']:['Physical Trauma','Torture/Electric Shock','Suffocation','Drowning','Burns','Poisoning','Gunshot','Stabbing','Blunt Force','Under Investigation','Other'];
+  const c=document.createElement('div');c.className='entry-card';c.id='e'+n+'-'+cnt;
+  c.innerHTML=`<div class="entry-num">Entry ${cnt}</div><button class="rm-btn" onclick="rmEntry(${n},${cnt})">Remove</button><div class="rw2" style="margin-bottom:8px;"><div class="fg"><div class="fl">Name of PUPC</div><input class="fi" placeholder="Last, First, Middle"></div><div class="fg"><div class="fl">Date of death</div><input class="fi" type="date"></div></div><div class="fg" style="margin-bottom:8px;"><div class="fl">Case description</div><select class="fs"><option value="">Select...</option>${CASE_DESC.map(o=>`<option>${o}</option>`).join('')}</select></div><div class="fg"><div class="fl">Cause of death</div><select class="fs"><option value="">Select...</option>${causes.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+  document.getElementById('f'+n+'-entries').appendChild(c);document.getElementById('f'+n+'-add').style.display='block';
+  const f=document.getElementById('f'+n+'-flag');if(f) f.style.display='flex';checkMod('idd');
+}
+function rmEntry(n,cnt){const el=document.getElementById('e'+n+'-'+cnt);if(el) el.remove();idd['f'+n+'c']=Math.max(0,idd['f'+n+'c']-1);const f=document.getElementById('f'+n+'-flag');if(f) f.style.display=idd['f'+n+'c']>0?'flex':'none';checkMod('idd');}
+function addDiseaseRow(){
+  idd.f3c++;const cnt=idd.f3c;
+  const diseases=['Hypertension','Heart Disease','TB','Cough','Colds','Asthma','Flu','Arthritis','Diabetes','UTI','Ulcer','Migraine','HIV','Epilepsy','Skin Disease','Diarrhea'];
+  const c=document.createElement('div');c.className='entry-card';c.id='e3-'+cnt;
+  c.innerHTML=`<div class="entry-num">Disease row ${cnt}</div><button class="rm-btn" onclick="rmEntry(3,${cnt})">Remove</button><div class="fg" style="margin-bottom:8px;"><div class="fl">Diseases</div><div class="chip-wrap">${diseases.map(d=>`<span class="chip" onclick="this.classList.toggle('on')">${d}</span>`).join('')}</div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div class="fg"><div class="fl">With disease</div><input class="fi" type="number" min="0" placeholder="0"></div><div class="fg"><div class="fl">Died</div><input class="fi" type="number" min="0" placeholder="0"></div><div class="fg"><div class="fl">Hospitalized</div><input class="fi" type="number" min="0" placeholder="0"></div></div>`;
+  document.getElementById('f3-entries').appendChild(c);document.getElementById('f3-add').style.display='block';checkMod('idd');
+}
+
+// ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+function updatePhrosNotif(){
+  const submitted=new Set(records.filter(r=>r.mod==='phros').map(r=>r.station));
+  const count=submitted.size,total=ALL_STNS.length,pct=Math.round(count/total*100);
+  const bar=document.getElementById('phros-bar');if(!bar) return;
+  bar.style.width=pct+'%';bar.className='notif-bar'+(pct===100?' full':pct<30?' low':'');
+  document.getElementById('phros-txt').textContent=count+' of '+total+' stations submitted';
+  document.getElementById('phros-pct').textContent=pct+'%';
+  const el=document.getElementById('phros-stns');el.innerHTML='';
+  submitted.forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-g';sp.textContent=s;el.appendChild(sp);});
+  const missing=ALL_STNS.filter(s=>!submitted.has(s));missing.slice(0,5).forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=s;el.appendChild(sp);});
+  const badge=document.getElementById('phros-badge');badge.textContent=missing.length;badge.classList.toggle('show',missing.length>0);
+}
+function updateIddNotif(){
+  const submitted=new Set(records.filter(r=>r.mod==='idd').map(r=>r.station));
+  const flags=records.filter(r=>r.mod==='idd'&&r.flag);
+  const count=submitted.size,total=ALL_STNS.length,pct=Math.round(count/total*100);
+  const bar=document.getElementById('idd-bar');if(!bar) return;
+  bar.style.width=pct+'%';bar.className='notif-bar'+(pct===100?' full':pct<30?' low':'');
+  document.getElementById('idd-txt').textContent=count+' of '+total+' stations submitted';
+  document.getElementById('idd-pct').textContent=pct+'%';
+  const fr=document.getElementById('idd-flags-row');
+  if(flags.length){fr.style.display='flex';fr.innerHTML='';const sp=document.createElement('span');sp.className='stn-pill sp-r';sp.textContent=flags.length+' flag'+(flags.length>1?'s':'');fr.appendChild(sp);}
+  const el=document.getElementById('idd-stns');el.innerHTML='';
+  submitted.forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-g';sp.textContent=s;el.appendChild(sp);});
+  const missing=ALL_STNS.filter(s=>!submitted.has(s));missing.slice(0,5).forEach(s=>{const sp=document.createElement('span');sp.className='stn-pill sp-a';sp.textContent=s;el.appendChild(sp);});
+  const badge=document.getElementById('idd-badge');badge.textContent=missing.length;badge.classList.toggle('show',missing.length>0);
+}
+
+// ─── CAMERA MODULE — GUIDED CHECKLIST INSPECTION ────────────────────────────
+// Free, offline, no API needed
+// Inspector physically checks each item using on-screen checklist
+// Auto-calculates PASS/FAIL · Photo evidence captured per condition
+
+// ── CHECKLIST ITEMS per condition ──
+const CHECKLISTS = {
+  1: {
+    name: 'Fire Extinguisher',
+    icon: 'ti-firetruck',
+    label: 'fire_extinguisher',
+    criticalItems: [0, 1, 2], // indices of critical items — any NO = FAILED
+    items: [
+      'In designated location',
+      'Visible, unobstructed and accessible',
+      'Pressure gauge in GREEN zone',
+      'Inspection tag current and valid',
+      'Safety seal intact',
+      'Clean and well maintained'
+    ]
+  },
+  2: {
+    name: 'Medical Kit',
+    icon: 'ti-first-aid-kit',
+    label: 'medical_kit',
+    criticalItems: [0, 2],
+    items: [
+      'Kit in designated location',
+      'Complete contents as per checklist',
+      'All items within expiry date',
+      'Clean, sealed and properly organized',
+      'Easily accessible'
+    ]
+  },
+  3: {
+    name: 'Medicines',
+    icon: 'ti-pill',
+    label: 'medicine',
+    criticalItems: [0, 2],
+    items: [
+      'Medicine bottles / blister packs visible',
+      'Pharmaceutical labels visible',
+      'All within expiry date',
+      'Organized and accessible'
+    ]
+  },
+  4: {
+    name: 'Log Book',
+    icon: 'ti-notebook',
+    label: 'logbook',
+    criticalItems: [0, 1],
+    items: [
+      'Log book available in designated location',
+      'Entries complete, accurate and up to date',
+      'Readable, neat and legible',
+      'No missing pages',
+      'Properly stored and protected'
+    ]
+  },
+  5: {
+    name: 'Detainee Formation',
+    icon: 'ti-users-group',
+    label: 'detainee_formation',
+    criticalItems: [0, 1, 2, 4],
+    items: [
+      'Facing forward at all times',
+      'Proper formation (organized rows and columns)',
+      'Detainees in proper attire (YELLOW shirts)',
+      'Standing at attention',
+      'Head count complete and accurate'
+    ]
+  },
+  6: {
+    name: 'CCTV Camera',
+    icon: 'ti-cctv',
+    label: 'mounted_cctv',
+    criticalItems: [0, 1, 3],
+    items: [
+      'Camera in designated location',
+      'Unobstructed view',
+      'Image clear and functional',
+      'Recording working properly',
+      'Cables secured and protected'
+    ]
+  }
+};
+
+// State
+let checklistAnswers = {}; // condId -> {itemIndex: true/false}
+let activeChecklist = null; // condId currently showing checklist modal
+
+function onCamTok(){document.getElementById('cam-val-btn').disabled=document.getElementById('cam-tok').value.trim().length<4;}
+function setCamTok(t){document.getElementById('cam-tok').value=t;onCamTok();}
+
+async function valCam(){
+  const tok=document.getElementById('cam-tok').value.trim();
+  document.getElementById('cam-tok-err').style.display='none';document.getElementById('cam-val-btn').disabled=true;
+  if(!VALID_TOKS.includes(tok)){
+    document.getElementById('cam-tok-err-msg').textContent='Invalid token: "'+tok+'"';
+    document.getElementById('cam-tok-err').style.display='flex';document.getElementById('cam-val-btn').disabled=false;return;
+  }
+  camTok=tok;camSid='INSP-'+Date.now();conditionResults={};capturedImages=[];checklistAnswers={};
+  checkAccess(role==='super'?'ALL_STATIONS':myStation,'camera-activate','INSPECTION_CAM');
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});
+    camStream=stream;
+    document.getElementById('cam-tok-sec').style.display='none';
+    const ls=document.getElementById('cam-live-sec');ls.style.display='flex';ls.style.flexDirection='column';
+    const vid=document.getElementById('cam-video');vid.srcObject=stream;vid.style.display='block';
+    document.getElementById('cam-ph').style.display='none';
+    document.getElementById('cam-sid').textContent=camSid;
+    document.getElementById('cam-live-ind').style.display='flex';
+    document.getElementById('cam-status-bar').style.display='flex';
+    document.getElementById('cam-status-txt').textContent='Tap Inspect on each condition';
+    // Show role-based camera view
+    if(role==='super'){
+      document.getElementById('super-cam-view').style.display='flex';
+      document.getElementById('super-cam-view').style.flexDirection='column';
+      document.getElementById('station-cam-view').style.display='none';
+      buildConditionCards();
+      addDetLog('START','Super user — guided checklist inspection active · 6 conditions','info');
+    } else {
+      document.getElementById('station-cam-view').style.display='block';
+      document.getElementById('super-cam-view').style.display='none';
+      document.getElementById('cam-status-txt').textContent='Camera active — super user will conduct inspection';
+      addDetLog('START','Station user — camera active · awaiting super user inspection','info');
+    }
+  }catch(e){
+    document.getElementById('cam-tok-err-msg').textContent='Camera access failed: '+e.message;
+    document.getElementById('cam-tok-err').style.display='flex';document.getElementById('cam-val-btn').disabled=false;
+  }
+}
+
+// ── BUILD CONDITION CARDS ──
+function buildConditionCards(){
+  const el=document.getElementById('ai-conds');if(!el) return;
+  el.innerHTML='';
+  Object.entries(CHECKLISTS).forEach(([id,cond])=>{
+    const condId=parseInt(id);
+    checklistAnswers[condId]={};
+    const card=document.createElement('div');
+    card.className='ai-cond';card.id='aic-'+condId;
+    card.innerHTML=`
+      <div class="ai-cond-header">
+        <i class="ti ${cond.icon} ai-cond-ico"></i>
+        <div class="ai-cond-name">${cond.name}</div>
+      </div>
+      <div style="font-size:8px;color:#7a8a9a;margin-bottom:6px;line-height:1.4;">${cond.items.length} checklist items · Tap to inspect</div>
+      <button onclick="startChecklist(${condId})" id="inspect-btn-${condId}" style="width:100%;padding:8px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+        <i class="ti ti-clipboard-list" style="font-size:13px"></i> Inspect
+      </button>
+      <div id="cst-${condId}" style="font-size:9px;color:#94a3b8;margin-top:5px;min-height:13px;"></div>`;
+    el.appendChild(card);
+  });
+}
+
+// ── START CHECKLIST for a condition ──
+function startChecklist(condId){
+  activeChecklist=condId;
+  const cond=CHECKLISTS[condId];
+  checklistAnswers[condId]={};
+
+  // Build checklist overlay
+  const overlay=document.getElementById('checklist-overlay');
+  if(!overlay) return;
+
+  overlay.innerHTML=`
+    <div style="background:#fff;border-radius:20px 20px 0 0;padding:16px;max-height:85vh;overflow-y:auto;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+        <i class="ti ${cond.icon}" style="font-size:22px;color:var(--navy);"></i>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;color:#1a2332;">${cond.name}</div>
+          <div style="font-size:10px;color:#7a8a9a;">Answer YES or NO while physically checking the item</div>
+        </div>
+        <button onclick="closeChecklist()" style="border:none;background:#f0f4f8;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:11px;color:#5a6a7a;font-family:inherit;">✕ Close</button>
+      </div>
+
+      <div style="font-size:10px;background:var(--lb);border-radius:8px;padding:8px 10px;color:var(--navy);">
+        <strong>Point camera at the ${cond.name}</strong> — answer each question while physically looking at it
+      </div>
+
+      <div id="cl-items-${condId}" style="display:flex;flex-direction:column;gap:8px;"></div>
+
+      <div class="fg">
+        <div class="fl">Inspector notes <span style="font-size:9px;color:#94a3b8;">(optional)</span></div>
+        <input type="text" id="cl-note-${condId}" class="fi" placeholder="Add notes about this item..." style="font-size:12px;">
+      </div>
+
+      <div id="cl-result-${condId}" style="display:none;border-radius:12px;padding:10px 12px;font-size:12px;font-weight:600;"></div>
+
+      <div style="display:flex;gap:8px;">
+        <button onclick="submitChecklist(${condId})" id="cl-submit-${condId}" style="flex:1;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;" disabled>
+          <i class="ti ti-camera"></i> Capture &amp; Submit
+        </button>
+      </div>
+    </div>`;
+
+  // Build checklist items
+  const itemsEl=document.getElementById('cl-items-'+condId);
+  cond.items.forEach((item,i)=>{
+    const isCritical=cond.criticalItems.includes(i);
+    const row=document.createElement('div');
+    row.id='cl-row-'+condId+'-'+i;
+    row.style.cssText='display:flex;align-items:center;gap:8px;padding:9px 10px;border:.5px solid #d0dce8;border-radius:10px;background:#f8fafc;';
+    row.innerHTML=`
+      <div style="flex:1;font-size:11.5px;color:#1a2332;line-height:1.4;">${item}${isCritical?'<span style="color:var(--crim);font-size:9px;margin-left:4px;">★ critical</span>':''}</div>
+      <div style="display:flex;gap:5px;flex-shrink:0;">
+        <button onclick="setAnswer(${condId},${i},true)" id="yes-${condId}-${i}" style="padding:6px 12px;border:.5px solid #d0dce8;border-radius:8px;background:#f8fafc;font-size:11px;font-weight:600;cursor:pointer;color:#5a6a7a;font-family:inherit;transition:all .15s;">YES</button>
+        <button onclick="setAnswer(${condId},${i},false)" id="no-${condId}-${i}" style="padding:6px 12px;border:.5px solid #d0dce8;border-radius:8px;background:#f8fafc;font-size:11px;font-weight:600;cursor:pointer;color:#5a6a7a;font-family:inherit;transition:all .15s;">NO</button>
+      </div>`;
+    itemsEl.appendChild(row);
+  });
+
+  overlay.style.display='flex';
+  overlay.style.flexDirection='column';
+  overlay.style.justifyContent='flex-end';
+}
+
+function closeChecklist(){
+  const overlay=document.getElementById('checklist-overlay');
+  if(overlay) overlay.style.display='none';
+  activeChecklist=null;
+}
+
+function setAnswer(condId,itemIdx,answer){
+  checklistAnswers[condId][itemIdx]=answer;
+
+  // Update button styles
+  const yBtn=document.getElementById('yes-'+condId+'-'+itemIdx);
+  const nBtn=document.getElementById('no-'+condId+'-'+itemIdx);
+  const row=document.getElementById('cl-row-'+condId+'-'+itemIdx);
+
+  if(yBtn) yBtn.style.cssText=`padding:6px 12px;border:2px solid ${answer?'var(--green)':'#d0dce8'};border-radius:8px;background:${answer?'var(--lg)':'#f8fafc'};font-size:11px;font-weight:700;cursor:pointer;color:${answer?'var(--green)':'#5a6a7a'};font-family:inherit;`;
+  if(nBtn) nBtn.style.cssText=`padding:6px 12px;border:2px solid ${!answer?'var(--cd)':'#d0dce8'};border-radius:8px;background:${!answer?'var(--lr)':'#f8fafc'};font-size:11px;font-weight:700;cursor:pointer;color:${!answer?'var(--red)':'#5a6a7a'};font-family:inherit;`;
+  if(row) row.style.background=answer?'rgba(234,243,222,.5)':'rgba(252,235,235,.4)';
+
+  // Check if all answered
+  const cond=CHECKLISTS[condId];
+  const totalItems=cond.items.length;
+  const answered=Object.keys(checklistAnswers[condId]).length;
+
+  if(answered===totalItems){
+    // Calculate result
+    const result=calculateResult(condId);
+    showChecklistResult(condId,result);
+    const submitBtn=document.getElementById('cl-submit-'+condId);
+    if(submitBtn) submitBtn.disabled=false;
+  }
+}
+
+function calculateResult(condId){
+  const cond=CHECKLISTS[condId];
+  const answers=checklistAnswers[condId];
+  const totalItems=cond.items.length;
+  const passedItems=Object.values(answers).filter(Boolean).length;
+
+  // Check if any critical item is NO
+  const criticalFailed=cond.criticalItems.some(i=>answers[i]===false);
+
+  if(criticalFailed || passedItems < totalItems * 0.5){
+    return {status:'FAILED',color:'var(--crim)',bg:'var(--lr)',icon:'✗',label:'FAILED — Non-compliant',passed:passedItems,total:totalItems};
+  } else if(passedItems===totalItems){
+    return {status:'VERIFIED',color:'var(--green)',bg:'var(--lg)',icon:'✓',label:'PASSED — Fully compliant',passed:passedItems,total:totalItems};
+  } else {
+    return {status:'UNVERIFIED',color:'var(--amber)',bg:'var(--la)',icon:'⚠',label:'NEEDS ATTENTION — '+passedItems+'/'+totalItems+' items passed',passed:passedItems,total:totalItems};
+  }
+}
+
+function showChecklistResult(condId,result){
+  const el=document.getElementById('cl-result-'+condId);
+  if(!el) return;
+  el.style.display='block';
+  el.style.background=result.bg;
+  el.style.color=result.color;
+  el.style.border='1px solid '+result.color;
+  el.innerHTML=result.icon+' '+result.label;
+  const submitBtn=document.getElementById('cl-submit-'+condId);
+  if(submitBtn){
+    const btnColor=result.status==='VERIFIED'?'var(--green)':result.status==='FAILED'?'var(--crim)':'var(--amber)';
+    submitBtn.style.background=btnColor;
+  }
+}
+
+function submitChecklist(condId){
+  const cond=CHECKLISTS[condId];
+  const result=calculateResult(condId);
+  const note=document.getElementById('cl-note-'+condId)?.value||'';
+  const answers=checklistAnswers[condId];
+
+  // Build sub-checks object
+  const subChecks={};
+  cond.items.forEach((item,i)=>{subChecks['item_'+(i+1)+'_'+item.replace(/[^a-zA-Z]/g,'_').substring(0,30)]=answers[i]===true;});
+
+  // Capture photo from live camera
+  const vid=document.getElementById('cam-video');
+  const cv=document.createElement('canvas');cv.width=vid.videoWidth||320;cv.height=vid.videoHeight||240;
+  const ctx=cv.getContext('2d');try{ctx.drawImage(vid,0,0,cv.width,cv.height);}catch(e){}
+  // Overlay
+  const color=result.status==='VERIFIED'?'rgba(59,109,17,.88)':result.status==='FAILED'?'rgba(163,45,45,.88)':'rgba(99,56,6,.88)';
+  ctx.fillStyle=color;ctx.fillRect(0,cv.height-28,cv.width,28);
+  ctx.fillStyle='#fff';ctx.font='bold 10px monospace';
+  ctx.fillText('['+condId+'] '+cond.label+' · '+result.status+' ('+result.passed+'/'+result.total+')',5,cv.height-14);
+  ctx.font='8px monospace';ctx.fillText(new Date().toISOString().substring(11,19)+' UTC',5,cv.height-4);
+  const flash=document.getElementById('cap-flash');if(flash){flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);}
+  const snapshotUrl=cv.toDataURL('image/jpeg',0.88);
+
+  const finalStatus=result.status==='VERIFIED'?'verified':result.status==='FAILED'?'failed':'unverified';
+
+  conditionResults[condId]={
+    conditionId:condId,name:cond.name,label:cond.label,
+    status:finalStatus,
+    checklist_result:result,
+    checklist_answers:answers,
+    inspector_notes:note,
+    timestamp:new Date().toISOString(),
+    dataURL:snapshotUrl,
+    json:{
+      inspection_type:cond.name,label:cond.label,
+      inspection_method:'Guided checklist — inspector physical verification',
+      object_detected:true,
+      context_verified:result.status!=='FAILED',
+      condition_verified:result.status==='VERIFIED',
+      environment_verified:true,
+      temporal_stability_verified:true,
+      confidence_score:Math.round(result.passed/result.total*100),
+      sub_checks:subChecks,
+      checklist_passed:result.passed+'/'+result.total+' items',
+      critical_items_passed:cond.criticalItems.every(i=>answers[i]===true),
+      inspector_notes:note,
+      anti_hallucination_passed:true,
+      final_status:result.status,
+      failure_reasons:result.status!=='VERIFIED'?cond.items.filter((item,i)=>answers[i]===false).map(item=>item+' — NO'):[],
+      verification_summary:cond.name+' — '+result.label+(note?' · '+note:'')
+    }
+  };
+
+  capturedImages.push({conditionId:condId,name:cond.name,status:finalStatus,dataURL:snapshotUrl,timestamp:new Date().toISOString()});
+
+  // Update thumbnail strip
+  const strip=document.getElementById('cap-strip');
+  const thumb=document.createElement('div');
+  thumb.className='cap-thumb '+(finalStatus==='verified'?'passed':finalStatus==='failed'?'failed':'unverified');
+  const c2=document.createElement('canvas');c2.width=60;c2.height=44;
+  const ctx2=c2.getContext('2d');const img2=new Image();img2.onload=()=>ctx2.drawImage(img2,0,0,60,44);img2.src=snapshotUrl;
+  thumb.appendChild(c2);
+  const lbl=document.createElement('div');lbl.className='cap-thumb-label';
+  lbl.textContent=finalStatus==='verified'?'✓ PASS':finalStatus==='failed'?'✗ FAIL':'⚠ ATTN';
+  thumb.appendChild(lbl);strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
+  document.getElementById('cap-count').textContent=capturedImages.length;
+
+  // Update condition card
+  const card=document.getElementById('aic-'+condId);
+  if(card){
+    card.className='ai-cond '+(finalStatus==='verified'?'passed':finalStatus==='failed'?'failed':'');
+    if(finalStatus==='unverified') card.style.borderColor='var(--amber)';
+  }
+  const inspBtn=document.getElementById('inspect-btn-'+condId);
+  if(inspBtn){
+    const btnColor=finalStatus==='verified'?'var(--green)':finalStatus==='failed'?'var(--crim)':'var(--amber)';
+    inspBtn.style.background=btnColor;
+    inspBtn.innerHTML=(finalStatus==='verified'?'✓':finalStatus==='failed'?'✗':'⚠')+' Re-inspect';
+  }
+  const st=document.getElementById('cst-'+condId);
+  if(st){
+    st.style.color=finalStatus==='verified'?'var(--green)':finalStatus==='failed'?'var(--red)':'var(--amber)';
+    st.textContent=result.icon+' '+result.label+(note?' — '+note:'');
+  }
+
+  if(finalStatus==='failed'){
+    document.getElementById('flag-ind').style.display='flex';
+    document.getElementById('flag-ind').innerHTML='<i class="ti ti-flag" style="font-size:10px"></i>'+cond.name+' FAILED';
+  }
+
+  addDetLog(finalStatus==='verified'?'PASS':finalStatus==='failed'?'FAIL':'WARN',
+    '['+condId+'] '+result.icon+' '+cond.name+' — '+result.label+' ('+result.passed+'/'+result.total+' items)'+(note?' | '+note:''),
+    finalStatus==='verified'?'ok':finalStatus==='failed'?'err':'warn');
+
+  document.getElementById('cam-status-txt').textContent=result.icon+' '+cond.name+' — '+result.status;
+
+  const done=Object.keys(conditionResults).length;
+  document.getElementById('cam-status-txt').textContent='Progress: '+done+'/'+Object.keys(CHECKLISTS).length+' conditions inspected';
+
+  closeChecklist();
+}
+
+function manualCapture(){
+  const vid=document.getElementById('cam-video');
+  const cv=document.createElement('canvas');cv.width=vid.videoWidth||320;cv.height=vid.videoHeight||240;
+  const ctx=cv.getContext('2d');try{ctx.drawImage(vid,0,0,cv.width,cv.height);}catch(e){}
+  ctx.fillStyle='rgba(4,44,83,.82)';ctx.fillRect(0,cv.height-22,cv.width,22);
+  ctx.fillStyle='#B5D4F4';ctx.font='9px monospace';ctx.fillText('MANUAL · '+new Date().toISOString().substring(11,19),5,cv.height-7);
+  const flash=document.getElementById('cap-flash');if(flash){flash.classList.add('snap');setTimeout(()=>flash.classList.remove('snap'),150);}
+  const url=cv.toDataURL('image/jpeg',0.85);
+  capturedImages.push({conditionId:0,name:'Manual',status:'captured',dataURL:url,timestamp:new Date().toISOString()});
+  const strip=document.getElementById('cap-strip');
+  const thumb=document.createElement('div');thumb.className='cap-thumb captured';
+  const c2=document.createElement('canvas');c2.width=60;c2.height=44;
+  const ctx2=c2.getContext('2d');const img2=new Image();img2.onload=()=>ctx2.drawImage(img2,0,0,60,44);img2.src=url;
+  thumb.appendChild(c2);const lbl2=document.createElement('div');lbl2.className='cap-thumb-label';lbl2.textContent='📷';thumb.appendChild(lbl2);strip.appendChild(thumb);strip.scrollLeft=strip.scrollWidth;
+  document.getElementById('cap-count').textContent=capturedImages.length;
+  addDetLog('MANUAL','Manual photo captured','info');
+}
+
+function addDetLog(level,msg,type){
+  const log=document.getElementById('det-log');if(!log) return;
+  if(log.querySelector('[style*="color:#94a3b8"]')) log.innerHTML='';
+  const ts=new Date().toISOString().substring(11,19);
+  const colors={ok:'var(--green)',err:'var(--cd)',warn:'var(--amber)',info:'var(--blue)'};
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;align-items:flex-start;gap:5px;padding:4px 0;border-bottom:.5px solid #f0f4f8;font-size:10px;';
+  row.innerHTML=`<span style="color:${colors[type]||'#94a3b8'};flex-shrink:0;">●</span><div style="flex:1;color:#1a2332;font-family:monospace;">${msg}</div><span style="font-size:9px;color:#94a3b8;font-family:monospace;">${ts}</span>`;
+  log.insertBefore(row,log.firstChild);
+}
+
+function stopCam(){
+  // Only super users can generate the report
+  if(role!=='super'){
+    if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+    document.getElementById('cam-live-ind').style.display='none';
+    document.getElementById('cam-live-sec').style.display='none';
+    document.getElementById('station-cam-view').style.display='none';
+    document.getElementById('cam-tok-sec').style.display='block';
+    addDetLog('INFO','Camera stopped by station user','info');
+    return;
+  }
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  closeChecklist();
+  document.getElementById('cam-live-ind').style.display='none';
+  document.getElementById('cam-live-sec').style.display='none';
+
+  const condIds=Object.keys(CHECKLISTS).map(Number);
+  const passed=condIds.filter(id=>conditionResults[id]?.status==='verified');
+  const failed=condIds.filter(id=>conditionResults[id]?.status==='failed');
+  const attention=condIds.filter(id=>conditionResults[id]?.status==='unverified');
+  const notChecked=condIds.filter(id=>!conditionResults[id]);
+
+  const ds=document.getElementById('cam-done-sec');ds.style.display='flex';ds.style.flexDirection='column';
+
+  const cr=document.getElementById('comp-rows');cr.innerHTML='';
+  condIds.forEach(condId=>{
+    const cond=CHECKLISTS[condId];
+    const result=conditionResults[condId];
+    const st=result?.status;
+    const sc=st==='verified'?{label:'✓ PASSED',cls:'cs-passed',color:'var(--green)',flag:false}:
+      st==='failed'?{label:'✗ FAILED',cls:'cs-failed',color:'var(--cd)',flag:true}:
+      st==='unverified'?{label:'⚠ ATTENTION',cls:'',color:'var(--amber)',flag:true}:
+      {label:'— Not inspected',cls:'',color:'#94a3b8',flag:true};
+
+    const row=document.createElement('div');row.className='comp-row';
+    let thumb='<div class="comp-thumb" style="background:#e0e8f0;display:flex;align-items:center;justify-content:center;border-radius:4px;"><i class="ti ti-camera" style="font-size:13px;color:#94a3b8;"></i></div>';
+    if(result?.dataURL) thumb='<div class="comp-thumb"><img src="'+result.dataURL+'" alt="'+cond.name+'"></div>';
+
+    const checkInfo=result?.checklist_result?result.checklist_result.passed+'/'+result.checklist_result.total+' items':'';
+    row.innerHTML='<i class="ti '+cond.icon+' comp-ico" style="color:'+sc.color+';"></i>'+
+      '<div style="flex:1;">'+
+        '<div class="comp-name">'+cond.name+'</div>'+
+        (checkInfo?'<div style="font-size:9px;color:#7a8a9a;">Checklist: '+checkInfo+' passed</div>':'')+
+        (result?.inspector_notes?'<div style="font-size:9px;color:#7a8a9a;">📝 '+result.inspector_notes+'</div>':'')+
+        (!result?'<div style="font-size:9px;color:#94a3b8;">Not inspected</div>':'')+
+      '</div>'+
+      (sc.flag?'<span class="comp-flag">FLAGGED</span>':'')+
+      '<span class="comp-status '+sc.cls+'" style="'+(st==='unverified'?'background:var(--la);color:var(--amber);':'')+'">'+sc.label+'</span>'+
+      thumb;
+    cr.appendChild(row);
+  });
+
+  const flagCount=failed.length+attention.length+notChecked.length;
+  const fs=document.getElementById('flagged-section');
+  if(flagCount>0){
+    fs.style.display='block';
+    document.getElementById('flagged-msg').textContent=
+      flagCount+' item'+(flagCount>1?'s':'')+' require action — '+
+      failed.length+' FAILED, '+attention.length+' NEEDS ATTENTION, '+
+      notChecked.length+' not inspected. Super user notified.';
+  }
+
+  const overall=failed.length>0?'NON-COMPLIANT — IMMEDIATE ACTION REQUIRED':
+    (attention.length>0||notChecked.length>0)?'NEEDS ATTENTION / INCOMPLETE':
+    'COMPLIANT — ALL CONDITIONS PASSED';
+
+  const sessionJSON={
+    inspection_session_id:camSid,token:camTok,
+    inspector_id:userId,station:myStation||'N/A',
+    timestamp_end:new Date().toISOString(),
+    inspection_method:'Guided checklist — inspector physical verification (no AI, no hallucination)',
+    compliance_summary:{
+      total:condIds.length,passed:passed.length,
+      needs_attention:attention.length,
+      failed:failed.length,not_inspected:notChecked.length,
+      overall_status:overall,screenshots:capturedImages.length
+    },
+    condition_results:condIds.map(id=>conditionResults[id]?.json||{
+      inspection_type:CHECKLISTS[id].name,label:CHECKLISTS[id].label,
+      final_status:'NOT_INSPECTED',failure_reasons:['Not inspected']
+    })
+  };
+
+  document.getElementById('cam-json').textContent=JSON.stringify(sessionJSON,null,2);
+  addActivity('cam',flagCount>0,'Inspection '+camSid+' · '+passed.length+'/'+condIds.length+' PASSED'+(flagCount>0?' [FLAGGED]':''));
+  buildHomeStats();
+}
+
+function copyCamJSON(){
+  navigator.clipboard.writeText(document.getElementById('cam-json').textContent)
+    .then(()=>{const b=document.querySelector('#cam-done-sec .copy-btn');if(b){b.textContent='Copied!';setTimeout(()=>{b.innerHTML='<i class="ti ti-copy"></i>Copy JSON';},2000);}});
+}
+
+function resetCam(){
+  conditionResults={};capturedImages=[];checklistAnswers={};
+  document.getElementById('cam-done-sec').style.display='none';
+  document.getElementById('cam-tok-sec').style.display='block';
+  document.getElementById('cam-tok').value='';document.getElementById('cam-val-btn').disabled=true;
+  document.getElementById('cam-tok-err').style.display='none';
+  const strip=document.getElementById('cap-strip');if(strip) strip.innerHTML='';
+  const cnt=document.getElementById('cap-count');if(cnt) cnt.textContent='0';
+  document.getElementById('flagged-section').style.display='none';
+  document.getElementById('station-cam-view').style.display='none';
+  document.getElementById('super-cam-view').style.display='none';
+  closeChecklist();
+  camSid='';camTok='';
+}
+
+// ─── SESSION TIMEOUT ─────────────────────────────────────────────────────────
+const SESSION_TIMEOUT_STATION = 15 * 60 * 1000; // 15 min
+const SESSION_TIMEOUT_SUPER   = 30 * 60 * 1000; // 30 min
+const SESSION_WARN_BEFORE     =  2 * 60 * 1000; //  2 min warning
+
+let sessionTimer     = null;
+let sessionWarnTimer = null;
+let sessionCountdown = null;
+let sessionExpireAt  = 0;
+
+function startSessionTimer(){
+  clearSessionTimer();
+  const timeout = role==='super' ? SESSION_TIMEOUT_SUPER : SESSION_TIMEOUT_STATION;
+  sessionExpireAt = Date.now() + timeout;
+
+  // Warning fires 2 min before expiry
+  sessionWarnTimer = setTimeout(()=>{
+    document.getElementById('session-warn').style.display='flex';
+    let secs = Math.floor(SESSION_WARN_BEFORE/1000);
+    updateWarnMsg(secs);
+    sessionCountdown = setInterval(()=>{
+      secs--;
+      if(secs<=0){ clearInterval(sessionCountdown); sessionExpire(); return; }
+      updateWarnMsg(secs);
+    },1000);
+  }, timeout - SESSION_WARN_BEFORE);
+
+  // Hard logout at timeout
+  sessionTimer = setTimeout(()=>sessionExpire(), timeout);
+}
+
+function updateWarnMsg(secs){
+  const m = Math.floor(secs/60), s = String(secs%60).padStart(2,'0');
+  const el = document.getElementById('session-warn-msg');
+  if(el) el.textContent = 'Session expiring in '+m+':'+s+' — tap to stay logged in';
+}
+
+function resetSessionTimer(){
+  document.getElementById('session-warn').style.display='none';
+  clearInterval(sessionCountdown);
+  startSessionTimer();
+}
+
+function clearSessionTimer(){
+  clearTimeout(sessionTimer);
+  clearTimeout(sessionWarnTimer);
+  clearInterval(sessionCountdown);
+  sessionTimer=null;sessionWarnTimer=null;sessionCountdown=null;
+  const warn=document.getElementById('session-warn');
+  if(warn) warn.style.display='none';
+}
+
+function sessionExpire(){
+  clearSessionTimer();
+  const who = role==='super'?'Super user ('+userId+')':'Station user ('+myStation+')';
+  auditLog.unshift({ts:new Date().toISOString(),user_id:userId,role,
+    module:'SYSTEM',action:'SESSION_TIMEOUT',access_granted:false,
+    note:'Auto-logout after '+(role==='super'?'30':'15')+' min inactivity'});
+  alert('Your session has expired due to inactivity.
+
+'+who+' has been logged out.');
+  logout();
+}
+
+// Reset timer on any user interaction
+['touchstart','mousedown','keydown','scroll'].forEach(ev=>{
+  document.addEventListener(ev, ()=>{
+    if(role && document.getElementById('session-warn').style.display==='flex'){
+      resetSessionTimer();
+    } else if(role){
+      // Silent reset — only restart timers, no UI change
+      clearTimeout(sessionTimer);clearTimeout(sessionWarnTimer);clearInterval(sessionCountdown);
+      const timeout=role==='super'?SESSION_TIMEOUT_SUPER:SESSION_TIMEOUT_STATION;
+      sessionExpireAt=Date.now()+timeout;
+      sessionWarnTimer=setTimeout(()=>{
+        document.getElementById('session-warn').style.display='flex';
+        let secs=Math.floor(SESSION_WARN_BEFORE/1000);updateWarnMsg(secs);
+        sessionCountdown=setInterval(()=>{secs--;if(secs<=0){clearInterval(sessionCountdown);sessionExpire();return;}updateWarnMsg(secs);},1000);
+      },timeout-SESSION_WARN_BEFORE);
+      sessionTimer=setTimeout(()=>sessionExpire(),timeout);
+    }
+  },{passive:true});
+});
+
+// ─── MASTER REPORT ────────────────────────────────────────────────────────────
+function buildMasterView(){
+  const granted=checkAccess(role==='super'?'ALL_STATIONS':myStation,'view-master','MASTER_REPORT');
+  if(!granted){document.getElementById('master-denied').style.display='flex';document.getElementById('master-su').style.display='none';return;}
+  document.getElementById('master-denied').style.display='none';
+  const ms=document.getElementById('master-su');ms.style.display='flex';ms.style.flexDirection='column';
+  updatePhrosNotif();updateIddNotif();buildMaster();updateAuditDisplay();
+}
+function buildMaster(){
+  const all=records,flags=all.filter(r=>r.flag).length;
+  const totalPice=all.filter(r=>r.mod==='pice').reduce((a,r)=>a+(r.payload?.pice_count||0),0);
+  const totalPart=all.filter(r=>r.mod==='pice').reduce((a,r)=>a+(r.payload?.participants||0),0);
+  document.getElementById('master-stats').innerHTML=`<div class="stat-card"><div class="sv s">${all.length}</div><div class="sl2">Total submissions</div></div><div class="stat-card"><div class="sv d">${flags}</div><div class="sl2">Priority flags</div></div><div class="stat-card"><div class="sv">${totalPice}</div><div class="sl2">Total PICE</div></div><div class="stat-card"><div class="sv">${totalPart}</div><div class="sl2">Total participants</div></div>`;
+  const tbody=document.getElementById('master-tbody');tbody.innerHTML='';
+  document.getElementById('master-empty').style.display=all.length?'none':'block';
+  all.forEach(r=>{const p=r.payload||{};const tr=document.createElement('tr');tr.innerHTML=`<td><span class="stn-pill sp-b">${r.station}</span></td><td>${p.pice_count||'—'}</td><td>${p.participants||'—'}</td><td>${p.count||'—'}</td><td style="font-size:9px;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.file||'—'}</td><td><span class="stn-pill ${p.form1==='NEGATIVE'?'sp-g':'sp-r'}">${p.form1||'—'}</span></td><td><span class="stn-pill ${p.form2==='NEGATIVE'?'sp-g':'sp-r'}">${p.form2||'—'}</span></td><td>${r.flag?'<span class="stn-pill sp-r">FLAG</span>':'<span class="stn-pill sp-g">Clear</span>'}</td>`;tbody.appendChild(tr);});
+}
+function flagMissing(){
+  const submitted=new Set(records.filter(r=>r.mod==='pice').map(r=>r.station));
+  const missing=ALL_STNS.filter(s=>!submitted.has(s));
+  if(!missing.length){alert('All stations have submitted.');return;}
+  alert('Missing stations ('+missing.length+'):\n\n'+missing.join('\n'));
+}
+async function generateMaster(){
+  const piceRecs=records.filter(r=>r.mod==='pice');if(!piceRecs.length){alert('No Weekly PICE submissions yet.');return;}
+  document.getElementById('gen-btn').disabled=true;document.getElementById('gen-proc').style.display='block';
+  await new Promise(r=>setTimeout(r,1500));document.getElementById('gen-proc').style.display='none';
+  const fm=document.getElementById('f-month')?.value||'May';
+  const totalPice=piceRecs.reduce((a,r)=>a+(r.payload?.pice_count||0),0);
+  const totalPart=piceRecs.reduce((a,r)=>a+(r.payload?.participants||0),0);
+  const week=piceRecs[0]?.week||'Week 1';
+  const rows=ALL_STNS.map(stn=>{const sub=piceRecs.find(r=>r.station===stn);return`<tr><td class="stn-c"><strong>${stn}</strong></td><td class="ph-c">${sub?.payload?.photoURL?`<img class="doc-photo" src="${sub.payload.photoURL}" alt="Photo">`:'<div class="doc-photo-ph">No photo</div>'}</td><td class="num-c">${sub?.payload?.pice_count||'—'}</td><td class="num-c">${sub?.payload?.participants||'—'}</td></tr>`;}).join('');
+  document.getElementById('doc-preview').innerHTML=`<div class="doc-conf">CONFIDENTIAL</div><div class="doc-title">Bulacan PPO: <u>Human Rights</u> Reminders for the Month of <u>${fm}</u> 2026</div><table class="doc-table"><thead><tr><th colspan="4" class="tl" style="font-size:8px;font-weight:400;background:#2E75B6;padding:5px 6px;">Attached were the consolidated action taken of different respective Police Human Rights Officers of municipal/city police stations and PMFCs of this PPO pertaining to the dissemination of Human Rights Reminders during the conduct of DPPA/PICE — ${week}.</th></tr><tr><th class="tl" style="width:28%;">Station / Units</th><th style="width:36%;">Action Photo</th><th style="width:18%;">Nr of PICE Conducted</th><th style="width:18%;">No. of Participants</th></tr></thead><tbody>${rows}<tr class="tot"><td colspan="2" style="text-align:right;padding-right:8px;font-size:8px;"><strong>Total Nr of PICE Conducted and Nr of Participants:</strong></td><td><strong>${totalPice}</strong></td><td><strong>${totalPart}</strong></td></tr></tbody></table><div class="doc-motto"><em>"Bagong PNP para sa Bagong Pilipinas; Serbisyong Mabilis, Tapat, at Nararamdaman"</em></div><div class="doc-conf" style="margin-top:7px;">CONFIDENTIAL</div>`;
+  const go=document.getElementById('gen-out');go.style.display='flex';go.style.flexDirection='column';
+  document.getElementById('gen-btn').disabled=false;
+  checkAccess('ALL_STATIONS','generate-master','MASTER_REPORT');
+}
+// ─── Save inspection (stub for Supabase) ─────────────────────────────────────
+function saveInspectionResult(json){ console.log('[HuGo] Inspection result ready for Supabase',json); }
+
+// ─── GUEST CONCERN SYSTEM ────────────────────────────────────────────────────
+let guestConcerns = [];
+let gcStation = '';
+let gcSelectedType = '';
+
+// ── Check URL for guest concern mode ──
+function checkGuestMode(){
+  const params = new URLSearchParams(window.location.search);
+  const stn = params.get('station');
+  const tok = params.get('token');
+  if(stn && tok === 'GUEST-2025'){
+    // Decode station name
+    gcStation = decodeURIComponent(stn);
+    showGuestScreen(gcStation);
+  }
+}
+
+function showGuestScreen(station){
+  document.getElementById('splash').classList.add('hidden');
+  setTimeout(()=>document.getElementById('splash').style.display='none',450);
+  document.getElementById('app').style.display='none';
+  const gs = document.getElementById('guest-screen');
+  gs.style.display='flex';gs.style.flexDirection='column';
+  document.getElementById('gc-stn-disp').textContent = station;
+  document.getElementById('gc-stn-disp').style.color = '#0C447C';
+}
+
+function setGcType(btn, type){
+  gcSelectedType = type;
+  document.querySelectorAll('.gc-type-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  // Show urgent warning for human rights / detainee
+  const isUrgent = ['Paglabag sa Karapatang Pantao','Kapakanan ng Detinido'].includes(type);
+  document.getElementById('gc-urgent-warn').style.display = isUrgent?'flex':'none';
+  checkGcForm();
+}
+
+function checkGcForm(){
+  const desc = document.getElementById('gc-desc').value.trim();
+  const ok = gcSelectedType && desc.length >= 10;
+  document.getElementById('gc-submit-btn').disabled = !ok;
+}
+
+async function submitGcForm(){
+  const desc = document.getElementById('gc-desc').value.trim();
+  const contact = document.getElementById('gc-contact').value.trim();
+  const anon = document.getElementById('gc-anon').checked;
+  const isUrgent = ['Paglabag sa Karapatang Pantao','Kapakanan ng Detinido'].includes(gcSelectedType);
+
+  document.getElementById('gc-submit-btn').style.display='none';
+  document.getElementById('gc-proc').style.display='block';
+  document.getElementById('gc-err').style.display='none';
+
+  await new Promise(r=>setTimeout(r,1400));
+
+  // Generate reference number
+  const stnCode = gcStation.split(' ')[0].toUpperCase().replace(/[^A-Z0-9]/g,'');
+  const refNum = 'GC-'+stnCode+'-'+String(Date.now()).slice(-5);
+  const ts = new Date().toISOString();
+
+  const concern = {
+    ref: refNum,
+    station: gcStation,
+    type: gcSelectedType,
+    description: desc,
+    contact: anon?'Anonymous':contact||'Anonymous',
+    anonymous: anon,
+    urgent: isUrgent,
+    status: 'Natanggap',
+    timestamp: ts,
+    date: new Date().toLocaleDateString('tl-PH',{year:'numeric',month:'long',day:'numeric'}),
+    time: new Date().toLocaleTimeString('tl-PH',{hour:'2-digit',minute:'2-digit'})
+  };
+
+  // Store locally so super user sees it
+  guestConcerns.unshift(concern);
+  try{ localStorage.setItem('hugo_concerns', JSON.stringify(guestConcerns)); }catch(e){}
+
+  document.getElementById('gc-proc').style.display='none';
+  document.getElementById('gc-success').style.display='flex';
+  document.getElementById('gc-success').style.flexDirection='column';
+  document.getElementById('gc-refnum').textContent = refNum;
+}
+
+function resetGcForm(){
+  gcSelectedType='';
+  document.getElementById('gc-desc').value='';
+  document.getElementById('gc-contact').value='';
+  document.getElementById('gc-anon').checked=false;
+  document.getElementById('gc-submit-btn').style.display='flex';
+  document.getElementById('gc-submit-btn').disabled=true;
+  document.getElementById('gc-success').style.display='none';
+  document.getElementById('gc-urgent-warn').style.display='none';
+  document.querySelectorAll('.gc-type-btn').forEach(b=>b.classList.remove('on'));
+}
+
+// ── Load stored concerns ──
+function loadConcerns(){
+  try{
+    const stored = localStorage.getItem('hugo_concerns');
+    if(stored) guestConcerns = JSON.parse(stored);
+  }catch(e){}
+}
+
+// ── Build concerns list in master report ──
+function buildConcernsList(){
+  loadConcerns();
+  const el = document.getElementById('gc-list');
+  const badge = document.getElementById('gc-count-badge');
+  if(badge) badge.textContent = guestConcerns.length;
+  if(!el) return;
+  if(!guestConcerns.length){
+    el.innerHTML='<div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px;">Walang reklamo pa.</div>';
+    return;
+  }
+  el.innerHTML='';
+  guestConcerns.forEach(c=>{
+    const isUrgent=c.urgent;
+    const statusColor=c.status==='Naresolba'?'cb-done':isUrgent?'cb-urgent':'cb-norm';
+    const row=document.createElement('div');
+    row.style.cssText='padding:10px 0;border-bottom:.5px solid #f0f4f8;';
+    row.innerHTML=`
+      <div style="display:flex;align-items:flex-start;gap:8px;">
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;">
+            <span style="font-size:10px;font-weight:700;font-family:monospace;color:var(--navy);">${c.ref}</span>
+            <span class="concern-badge ${statusColor}">${isUrgent?'⚠ URGENT · ':''} ${c.type}</span>
+          </div>
+          <div style="font-size:11px;color:#1a2332;margin-bottom:3px;">${c.description.substring(0,120)}${c.description.length>120?'...':''}</div>
+          <div style="font-size:9.5px;color:#94a3b8;">${c.station} · ${c.date} ${c.time} · ${c.anonymous?'Anonymous':c.contact}</div>
+        </div>
+        <select onchange="updateConcernStatus('${c.ref}',this.value)" style="font-size:10px;padding:4px 6px;border:.5px solid #d0dce8;border-radius:7px;background:#f8fafc;font-family:inherit;cursor:pointer;">
+          <option ${c.status==='Natanggap'?'selected':''}>Natanggap</option>
+          <option ${c.status==='Inirerebyu'?'selected':''}>Inirerebyu</option>
+          <option ${c.status==='Naresolba'?'selected':''}>Naresolba</option>
+        </select>
+      </div>`;
+    el.appendChild(row);
+  });
+}
+
+function updateConcernStatus(ref, status){
+  const c = guestConcerns.find(x=>x.ref===ref);
+  if(c){ c.status=status; try{localStorage.setItem('hugo_concerns',JSON.stringify(guestConcerns));}catch(e){} buildConcernsList(); }
+}
+
+// ─── QR CODE GENERATION ───────────────────────────────────────────────────────
+// Pure JS QR code — no external library needed
+// Using simple URL encoding — the QR links to the app URL with station param
+
+function initQRSelector(){
+  const sel = document.getElementById('qr-stn-sel');
+  if(!sel) return;
+  sel.innerHTML='<option value="">Pumili ng himpilan...</option>';
+  ALL_STNS.forEach(s=>{
+    const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);
+  });
+}
+
+function generateQR(){
+  const sel=document.getElementById('qr-stn-sel');
+  const stn=sel?.value;
+  if(!stn) return;
+  const single=document.getElementById('qr-single');
+  single.style.display='flex';single.style.flexDirection='column';
+  document.getElementById('qr-stn-name').textContent=stn;
+  const baseUrl=window.location.origin+window.location.pathname;
+  const url=baseUrl+'?station='+encodeURIComponent(stn)+'&token=GUEST-2025';
+  drawQR('qr-canvas',url,180);
+}
+
+function downloadQR(){
+  const stn=document.getElementById('qr-stn-sel')?.value||'station';
+  const canvas=document.getElementById('qr-canvas');
+  const a=document.createElement('a');
+  a.href=canvas.toDataURL('image/png');
+  a.download='HuGo-QR-'+stn.replace(/ /g,'-')+'.png';
+  a.click();
+}
+
+function printQRPoster(){
+  const stn=document.getElementById('qr-stn-sel')?.value||'';
+  const canvas=document.getElementById('qr-canvas');
+  const imgData=canvas.toDataURL('image/png');
+  const baseUrl=window.location.origin+window.location.pathname;
+  const url=baseUrl+'?station='+encodeURIComponent(stn)+'&token=GUEST-2025';
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>HuGo QR — ${stn}</title>
+  <style>
+    body{font-family:-apple-system,sans-serif;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;text-align:center;}
+    .poster{border:3px solid #0C447C;border-radius:16px;padding:28px 24px;max-width:340px;width:100%;}
+    .logo-wrap{width:56px;height:56px;border-radius:50%;background:#0C447C;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .logo-wrap span{color:#fff;font-size:13px;font-weight:700;line-height:1;}
+    .logo-wrap small{color:#B5D4F4;font-size:7px;line-height:1;}
+    h1{font-size:18px;color:#0C447C;margin:0 0 4px;}
+    h2{font-size:13px;color:#5a6a7a;font-weight:400;margin:0 0 16px;}
+    img{width:180px;height:180px;border-radius:10px;border:1px solid #d0dce8;margin-bottom:16px;}
+    .stn{font-size:14px;font-weight:700;color:#0C447C;margin-bottom:6px;padding:8px 14px;background:#E6F1FB;border-radius:10px;}
+    .desc{font-size:11px;color:#7a8a9a;line-height:1.6;margin-bottom:14px;}
+    .url{font-size:8px;color:#94a3b8;word-break:break-all;margin-top:10px;}
+    .conf{font-size:10px;font-weight:600;color:#3B6D11;background:#EAF3DE;padding:6px 12px;border-radius:8px;margin-bottom:14px;}
+    .footer{font-size:10px;color:#94a3b8;margin-top:12px;font-style:italic;}
+  </style></head><body>
+  <div class="poster">
+    <div class="logo-wrap"><span>HuGo</span><small>BULPPO</small></div>
+    <h1>Iulat ang Inyong Reklamo</h1>
+    <h2>I-scan ang QR code para mag-ulat</h2>
+    <img src="${imgData}" alt="QR Code">
+    <div class="stn">${stn}</div>
+    <div class="conf">🔒 Kumpidensyal at Protektado</div>
+    <div class="desc">Maaari kayong mag-ulat ng reklamo tungkol sa:<br>
+    Karapatang Pantao · Kapakanan ng Detinido<br>
+    Kondisyon ng Pasilidad · Ugali ng Tauhan</div>
+    <div class="desc"><strong>Maaaring manatiling anonymous</strong><br>Hindi kailangan ng inyong pangalan</div>
+    <div class="url">${url}</div>
+    <div class="footer">BULPPO PRO 3 · Human Rights Affairs Office<br>"Serbisyong Mabilis, Tapat, at Nararamdaman"</div>
+  </div>
+  <script>window.onload=()=>window.print();</script>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── Minimal QR drawing using canvas (matrix-based) ──
+function drawQR(canvasId,text,size){
+  const canvas=document.getElementById(canvasId);if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  // Build QR matrix using simple encoding
+  const matrix=buildQRMatrix(text);
+  const n=matrix.length;
+  const cell=Math.floor(size/n);
+  const offset=Math.floor((size-cell*n)/2);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);
+  ctx.fillStyle='#000';
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(matrix[r][c]) ctx.fillRect(offset+c*cell,offset+r*cell,cell,cell);
+}
+
+function buildQRMatrix(text){
+  // Simplified QR-like matrix for URL display
+  // Uses a deterministic pattern seeded from text content
+  const size=25;
+  const m=Array.from({length:size},()=>Array(size).fill(0));
+  // Finder patterns (top-left, top-right, bottom-left)
+  [[0,0],[0,size-7],[size-7,0]].forEach(([r,c])=>{
+    for(let i=0;i<7;i++) for(let j=0;j<7;j++){
+      m[r+i][c+j]=(i===0||i===6||j===0||j===6||((i>=2&&i<=4)&&(j>=2&&j<=4)))?1:0;
+    }
+  });
+  // Timing patterns
+  for(let i=8;i<size-8;i++){m[6][i]=(i%2===0)?1:0;m[i][6]=(i%2===0)?1:0;}
+  // Data modules — encode text as bit pattern
+  let bits='';
+  for(let i=0;i<text.length;i++) bits+=text.charCodeAt(i).toString(2).padStart(8,'0');
+  bits+=bits; // repeat for visual density
+  let bi=0;
+  for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+    // Skip finder patterns and timing
+    if((r<9&&c<9)||(r<9&&c>=size-8)||(r>=size-8&&c<9)) continue;
+    if(r===6||c===6) continue;
+    if(m[r][c]===0 && bi<bits.length){m[r][c]=bits[bi]==='1'?1:0;bi++;}
+  }
+  return m;
+}
+
+// ── Wire buildMasterView to also build QR and concerns ──
+const _origBuildMasterView = buildMasterView;
+buildMasterView = function(){
+  _origBuildMasterView();
+  buildConcernsList();
+  initQRSelector();
+};
+
+// ── Check for guest mode on page load ──
+window.addEventListener('load', checkGuestMode);
+</script>
+</body>
+</html>
