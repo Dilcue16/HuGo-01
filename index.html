@@ -1226,6 +1226,14 @@ function updateAuditDisplay(){
 // ═══════════════════════════════════════════════════════
 function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 function rnd(){return Math.floor(Math.random()*900+100);}
+// Populate station dropdown on page load
+(function(){
+  const sel=document.getElementById('stn-sel');
+  if(sel){
+    sel.innerHTML='<option value="">Select station...</option>';
+    ['1ST PMFC','2ND PMFC','ANGAT MPS','BALAGTAS MPS','BALIWAG CPS','BOCAUE MPS','BULAKAN MPS','BUSTOS MPS','CALUMPIT MPS','DRT MPS','GUIGUINTO MPS','HAGONOY MPS','MALOLOS CPS','MARILAO MPS','MEYCAUAYAN CPS','NORZAGARAY MPS','OBANDO MPS','PANDI MPS','PAOMBONG MPS','PLARIDEL MPS','PULILAN MPS','SAN ILDEFONSO MPS','SAN MIGUEL MPS','SAN RAFAEL MPS','SANTA MARIA MPS','SJDM CPS','PHQ'].forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+  }
+})();
 window.addEventListener('load',checkGuestMode);
 </script>
 </body>
