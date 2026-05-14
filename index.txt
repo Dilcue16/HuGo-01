@@ -1669,6 +1669,8 @@ function buildMasterView(){
   document.getElementById('master-denied').style.display='none';
   const ms=document.getElementById('master-su');ms.style.display='flex';ms.style.flexDirection='column';
   updatePhrosNotif();updateIddNotif();buildMaster();updateAuditDisplay();
+  buildConcernsList();
+  initQRSelector();
 }
 function buildMaster(){
   const all=records,flags=all.filter(r=>r.flag).length;
@@ -1965,13 +1967,7 @@ function buildQRMatrix(text){
   return m;
 }
 
-// ── Wire buildMasterView to also build QR and concerns ──
-const _origBuildMasterView = buildMasterView;
-buildMasterView = function(){
-  _origBuildMasterView();
-  buildConcernsList();
-  initQRSelector();
-};
+// QR and concerns are called directly inside buildMasterView
 
 // ── Check for guest mode on page load ──
 window.addEventListener('load', checkGuestMode);
