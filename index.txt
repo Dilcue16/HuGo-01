@@ -580,6 +580,27 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
       <div class="view" id="view-master">
         <div class="alert err" id="master-denied" style="display:none;"><i class="ti ti-lock"></i>Access denied — super users only.</div>
         <div id="master-su" style="display:none;flex-direction:column;gap:12px;">
+          <div class="sec-lbl">Guest concerns <span class="stn-pill sp-b" id="gc-count-badge" style="margin-left:4px;">0</span></div>
+          <div class="card" id="gc-list-card">
+            <div id="gc-list"><div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px;">Walang reklamo pa.</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ti ti-qrcode"></i>QR Code — Guest Concern Form</div>
+            <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>I-post ang QR code sa bawat himpilan. I-scan ng bisita para mag-ulat ng reklamo nang walang login.</div>
+            <div class="fg" style="margin-bottom:10px;">
+              <select class="fs" id="qr-stn-sel" onchange="generateQR()">
+                <option value="">Pumili ng himpilan...</option>
+              </select>
+            </div>
+            <div id="qr-single" style="display:none;flex-direction:column;align-items:center;gap:10px;">
+              <canvas id="qr-canvas" width="180" height="180" style="border-radius:10px;border:1px solid #d0dce8;"></canvas>
+              <div id="qr-stn-name" style="font-size:12px;font-weight:600;color:#1a2332;"></div>
+              <div style="display:flex;gap:8px;width:100%;">
+                <button class="sbtn" style="flex:1;" onclick="downloadQR()"><i class="ti ti-download"></i>I-download</button>
+                <button class="gbtn" style="flex:1;justify-content:center;" onclick="printQRPoster()"><i class="ti ti-printer"></i>I-print</button>
+              </div>
+            </div>
+          </div>
           <div class="sec-lbl">Submission notifications</div>
           <div class="notif-card"><div class="notif-title"><i class="ti ti-users"></i>Monthly PHROs &amp; COs</div><div class="notif-bar-wrap"><div class="notif-bar" id="phros-bar" style="width:0%"></div></div><div class="notif-nums"><span id="phros-txt">0 of 27 stations submitted</span><span id="phros-pct">0%</span></div><div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:2px;" id="phros-stns"></div></div>
           <div class="notif-card"><div class="notif-title"><i class="ti ti-file-description"></i>Monthly IDD</div><div class="notif-bar-wrap"><div class="notif-bar" id="idd-bar" style="width:0%"></div></div><div class="notif-nums"><span id="idd-txt">0 of 27 stations submitted</span><span id="idd-pct">0%</span></div><div id="idd-flags-row" style="display:none;margin-top:6px;flex-wrap:wrap;gap:5px;"></div><div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:2px;" id="idd-stns"></div></div>
@@ -597,28 +618,6 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
               <div class="alert ok"><i class="ti ti-circle-check"></i>Master copy generated.</div>
               <div class="pice-preview"><div class="doc-inner" id="doc-preview"></div></div>
               <button class="gbtn" style="width:100%;justify-content:center;" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>
-            </div>
-          </div>
-          <div class="sec-lbl">Guest concerns <span class="stn-pill sp-b" id="gc-count-badge" style="margin-left:4px;">0</span></div>
-          <div class="card" id="gc-list-card">
-            <div id="gc-list"><div style="font-size:12px;color:#94a3b8;text-align:center;padding:8px;">Walang reklamo pa.</div></div>
-          </div>
-          <div class="sec-lbl">QR codes — Guest concern form</div>
-          <div class="card">
-            <div class="card-title"><i class="ti ti-qrcode"></i>I-print ang QR Code</div>
-            <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>I-post ang QR code sa bawat himpilan. I-scan ng bisita para mag-ulat ng reklamo nang walang login.</div>
-            <div class="fg" style="margin-bottom:10px;">
-              <select class="fs" id="qr-stn-sel" onchange="generateQR()">
-                <option value="">Pumili ng himpilan...</option>
-              </select>
-            </div>
-            <div id="qr-single" style="display:none;flex-direction:column;align-items:center;gap:10px;">
-              <canvas id="qr-canvas" width="180" height="180" style="border-radius:10px;border:1px solid #d0dce8;"></canvas>
-              <div id="qr-stn-name" style="font-size:12px;font-weight:600;color:#1a2332;"></div>
-              <div style="display:flex;gap:8px;width:100%;">
-                <button class="sbtn" style="flex:1;" onclick="downloadQR()"><i class="ti ti-download"></i>I-download</button>
-                <button class="gbtn" style="flex:1;justify-content:center;" onclick="printQRPoster()"><i class="ti ti-printer"></i>I-print</button>
-              </div>
             </div>
           </div>
           <div class="sec-lbl">Access audit log</div>
