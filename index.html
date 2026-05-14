@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- HuGo-FINAL-2026-05-14 -->
 <html lang="en">
 <head>
 <script>
@@ -385,7 +386,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div id="app">
   <div id="hdr">
     <div class="hdr-logo"><span class="lm">HuGo</span><span class="ls">v8</span></div>
-    <div class="hdr-text"><h1>Human Rights on the Go</h1><div class="hs">BULPPO PRO 3 · <span id="hdr-sub">PHRA Bulacan</span></div></div>
+    <div class="hdr-text"><h1>Human Rights on the Go</h1><div class="hs">BULPPO PRO 3 · <span id="hdr-sub">BULPPO PRO 3 · PNP</span></div></div>
     <div class="live-pill" id="live-pill"><div class="live-dot"></div>LIVE</div>
   </div>
   <div id="offline-bar">⚠ You are offline — AI features unavailable</div>
@@ -393,8 +394,8 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
   <!-- LOGIN -->
   <div id="login-screen">
     <div id="install-banner"><div><div style="font-size:13px;font-weight:600;color:#fff;">Install HuGo</div><div style="font-size:11px;color:var(--mb);margin-top:2px;">Add to home screen</div></div><button style="padding:8px 14px;background:#fff;color:var(--navy);border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;" onclick="installApp()">Install</button><button style="color:var(--mb);font-size:18px;cursor:pointer;background:none;border:none;" onclick="this.parentElement.style.display='none'"><i class="ti ti-x"></i></button></div>
-    <div class="ls-title">Welcome to HuGo v10</div>
-    <div class="ls-sub">Strict AI visual recognition — Blue PUPC logbook, Yellow PUPC formation, Medicine detection. Select your role to begin.</div>
+    <div class="ls-title">Welcome to HuGo</div>
+    <div class="ls-sub">Human Rights on the Go · BULPPO PRO 3 · PNP<br>Select your role to begin.</div>
     <div class="role-grid">
       <div class="role-card" onclick="showStationAuth()"><div class="rc-ico"><i class="ti ti-building"></i></div><div class="rc-name">Station user</div><div class="rc-info">Select your station and enter passcode</div></div>
       <div class="role-card sup-card" onclick="showSuperAuth()"><div class="rc-ico"><i class="ti ti-shield-check"></i></div><div class="rc-name">Super user</div><div class="rc-info">Enter master password for full access</div></div>
@@ -2151,7 +2152,8 @@ function printQR(){
   const url=location.origin+location.pathname+'?station='+encodeURIComponent(stn)+'&token=GUEST-2025';
   const w=window.open('','_blank');
   if(!w) return;
-  w.document.write('<!DOCTYPE html><html><head><title>HuGo QR — '+stn+'</title><style>body{font-family:sans-serif;text-align:center;padding:30px;}.poster{border:3px solid #0C447C;border-radius:16px;padding:24px;max-width:300px;margin:0 auto;}img{width:160px;height:160px;border-radius:8px;margin:16px 0;}h2{color:#0C447C;margin:0 0 4px;}p{color:#5a6a7a;font-size:12px;margin:4px 0;}.conf{color:#3B6D11;font-size:11px;font-weight:600;background:#EAF3DE;padding:5px 10px;border-radius:8px;margin:8px 0;}</style></head><body><div class="poster"><h2>Iulat ang Inyong Reklamo</h2><p>I-scan ang QR code</p><img src="'+img+'"><div style="font-weight:700;color:#0C447C;margin-bottom:6px;">'+stn+'</div><div class="conf">🔒 Kumpidensyal at Protektado</div><p>Maaaring manatiling anonymous</p><p style="font-size:9px;color:#94a3b8;word-break:break-all;">'+url+'</p><p style="font-style:italic;font-size:10px;color:#94a3b8;">Serbisyong Mabilis, Tapat, at Nararamdaman</p></div></body></html>');
+  w.document.write('<!DOCTYPE html>
+<!-- HuGo-FINAL-2026-05-14 --><html><head><title>HuGo QR — '+stn+'</title><style>body{font-family:sans-serif;text-align:center;padding:30px;}.poster{border:3px solid #0C447C;border-radius:16px;padding:24px;max-width:300px;margin:0 auto;}img{width:160px;height:160px;border-radius:8px;margin:16px 0;}h2{color:#0C447C;margin:0 0 4px;}p{color:#5a6a7a;font-size:12px;margin:4px 0;}.conf{color:#3B6D11;font-size:11px;font-weight:600;background:#EAF3DE;padding:5px 10px;border-radius:8px;margin:8px 0;}</style></head><body><div class="poster"><h2>Iulat ang Inyong Reklamo</h2><p>I-scan ang QR code</p><img src="'+img+'"><div style="font-weight:700;color:#0C447C;margin-bottom:6px;">'+stn+'</div><div class="conf">🔒 Kumpidensyal at Protektado</div><p>Maaaring manatiling anonymous</p><p style="font-size:9px;color:#94a3b8;word-break:break-all;">'+url+'</p><p style="font-style:italic;font-size:10px;color:#94a3b8;">Serbisyong Mabilis, Tapat, at Nararamdaman</p></div></body></html>');
   w.document.close();setTimeout(()=>w.print(),500);
 }
 
