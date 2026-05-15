@@ -248,7 +248,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </style>
 </head>
 <body>
-<div id="dbg" style="position:fixed;bottom:4px;left:4px;right:4px;z-index:99999;background:rgba(0,0,0,.85);color:#0f0;font-family:monospace;font-size:11px;padding:6px;border-radius:6px;pointer-events:none;display:block;">Tap anything — debug active</div>
+
 <script>
 document.addEventListener('click',function(e){
   var d=document.getElementById('dbg');
@@ -635,6 +635,13 @@ document.addEventListener('touchstart',function(e){
 <div id="guest-wrap"></div>
 
 <script>
+// Global error catcher
+window.onerror = function(msg,src,line,col,err){
+  var d=document.getElementById('err-bar');
+  if(!d){d=document.createElement('div');d.id='err-bar';d.style.cssText='position:fixed;bottom:0;left:0;right:0;background:red;color:#fff;font-size:10px;padding:5px;z-index:99999;font-family:monospace;';document.body.appendChild(d);}
+  d.textContent='JS ERROR: '+msg+' (line '+line+')';
+  return false;
+};
 // ═══════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════
@@ -853,17 +860,36 @@ function manNum(k,v){
 function handlePhoto(mod,files){
   if(!files||!files[0])return;
   const f=files[0];photos[mod]=f;
-  const r=new FileReader();r.onload=e=>{photos[mod+'URL']=e.target.result;
-    document.getElementById(mod+'-prev').innerHTML='<div class="file-prev"><i class="ti ti-photo"></i><span class="fp-n">'+f.name+'</span><button class="fp-r" onclick="photos[\''+mod+'\']=null;photos[\''+mod+'URL\']=\'\';document.getElementById(\''+mod+'-prev\').innerHTML=\'\';chkMod()">Remove</button></div>';
-    chkMod();};r.readAsDataURL(f);
+  const r=new FileReader();
+  r.onload=function(e){
+    photos[mod+'URL']=e.target.result;
+    const pp=document.getElementById(mod+'-prev');
+    pp.innerHTML='';
+    const pd=document.createElement('div');pd.className='file-prev';
+    const icon=document.createElement('i');icon.className='ti ti-photo';
+    const nm=document.createElement('span');nm.className='fp-n';nm.textContent=f.name;
+    const rb=document.createElement('button');rb.className='fp-r';rb.textContent='Remove';
+    rb.onclick=function(){photos[mod]=null;photos[mod+'URL']='';pp.innerHTML='';chkMod();};
+    pd.appendChild(icon);pd.appendChild(nm);pd.appendChild(rb);pp.appendChild(pd);
+    chkMod();
+  };
+  r.readAsDataURL(f);
 }
+
 // ── PUPC data store ──
 let pupcData={};
 
 function handleXlsx(files){
   if(!files||!files[0])return;
   phrosFile=files[0];
-  document.getElementById('phros-prev').innerHTML='<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">'+phrosFile.name+'</span><button class="fp-r" onclick="phrosFile=null;document.getElementById('phros-prev').innerHTML='';chkMod()">Remove</button></div>';
+  const pp=document.getElementById('phros-prev');
+  pp.innerHTML='';
+  const pd=document.createElement('div');pd.className='file-prev';
+  const icon=document.createElement('i');icon.className='ti ti-file-spreadsheet';
+  const nm=document.createElement('span');nm.className='fp-n';nm.textContent=phrosFile.name;
+  const rb=document.createElement('button');rb.className='fp-r';rb.textContent='Remove';
+  rb.onclick=function(){phrosFile=null;pp.innerHTML='';chkMod();};
+  pd.appendChild(icon);pd.appendChild(nm);pd.appendChild(rb);pp.appendChild(pd);
   chkMod();
 }
 function parsePupcXlsx(rows,filename){
@@ -1172,7 +1198,20 @@ let pupcFile=null,pupcWeek='',pupcMonthVal='';
 function handlePupcXlsx(files){
   if(!files||!files[0])return;
   pupcFile=files[0];
-  document.getElementById('pupc-file-prev').innerHTML='<div class="file-prev"><i class="ti ti-file-spreadsheet"></i><span class="fp-n">'+pupcFile.name+'</span><button class="fp-r" onclick="pupcFile=null;document.getElementById('pupc-file-prev').innerHTML='';document.getElementById('pupc-data-preview').style.display='none';chkPupc()">Remove</button></div>';
+  const pp=document.getElementById('pupc-file-prev');
+  pp.innerHTML='';
+  const pd=document.createElement('div');pd.className='file-prev';
+  const icon=document.createElement('i');icon.className='ti ti-file-spreadsheet';
+  const nm=document.createElement('span');nm.className='fp-n';nm.textContent=pupcFile.name;
+  const rb=document.createElement('button');rb.className='fp-r';rb.textContent='Remove';
+  rb.onclick=function(){
+    pupcFile=null;pp.innerHTML='';
+    const dpv=document.getElementById('pupc-data-preview');
+    if(dpv)dpv.style.display='none';
+    chkPupc();
+  };
+  pd.appendChild(icon);pd.appendChild(nm);pd.appendChild(rb);pp.appendChild(pd);
+  // Parse with SheetJS
   // Parse with SheetJS
   const reader=new FileReader();
   reader.onload=function(e){
@@ -1188,7 +1227,6 @@ function handlePupcXlsx(files){
   reader.readAsArrayBuffer(pupcFile);
   chkPupc();
 }
-
 function parsePupcXlsx(rows,filename){
   // Find header row
   let headerRow=1;
