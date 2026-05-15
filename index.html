@@ -338,10 +338,12 @@ document.addEventListener('touchstart',function(e){
   <div class="mod-grid">
     <div class="mod-card" onclick="goMod('pice')"><div class="mc-ico"><i class="ti ti-calendar-week"></i></div><div class="mc-name">Weekly PICE</div><div class="mc-desc">Weekly activity report</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" onclick="goMod('med')"><div class="mc-ico"><i class="ti ti-stethoscope"></i></div><div class="mc-name">Monthly Medical</div><div class="mc-desc">Medical check-up report</div><div class="mc-badge mb-g">Ready</div></div>
+    <div class="mod-card" onclick="goMod('pupc')"><div class="mc-ico"><i class="ti ti-table"></i></div><div class="mc-name">Weekly PUPC</div><div class="mc-desc">PUPC Excel report upload</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" onclick="goMod('phros')"><div class="mc-ico"><i class="ti ti-users"></i></div><div class="mc-name">PHROs &amp; COs</div><div class="mc-desc">Excel file submission</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" onclick="goMod('idd')"><div class="mc-ico"><i class="ti ti-file-description"></i></div><div class="mc-name">Monthly IDD</div><div class="mc-desc">Disease &amp; death report</div><div class="mc-badge mb-g" id="idd-hbadge">Ready</div></div>
     <div class="mod-card" onclick="goMod('pupc')"><div class="mc-ico"><i class="ti ti-users-group"></i></div><div class="mc-name">PUPC Weekly</div><div class="mc-desc">Weekly persons in custody</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" onclick="goMod('cam')"><div class="mc-ico"><i class="ti ti-camera"></i></div><div class="mc-name">Inspection Cam</div><div class="mc-desc" id="cam-home-desc">Manual inspection</div><div class="mc-badge mb-b" id="cam-home-badge">Token req'd</div></div>
+    <div class="mod-card" onclick="goMod('pupc')"><div class="mc-ico"><i class="ti ti-table-import"></i></div><div class="mc-name">Weekly PUPC</div><div class="mc-desc">Excel report upload</div><div class="mc-badge mb-g">Ready</div></div>
     <div class="mod-card" id="master-mod-card" onclick="goMod('master')"><div class="mc-ico"><i class="ti ti-file-certificate"></i></div><div class="mc-name">Master Report</div><div class="mc-desc">Consolidated reports</div><div class="mc-badge mb-b" id="master-home-badge">Super user only</div></div>
   </div>
   <div class="sec-lbl">Recent activity</div>
@@ -479,6 +481,44 @@ document.addEventListener('touchstart',function(e){
   <div id="pupc-done"></div>
 </div>
 
+<!-- WEEKLY PUPC -->
+<div class="screen" id="scr-pupc">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="gbtn" onclick="goMod('home')" style="padding:8px;"><i class="ti ti-arrow-left"></i></button>
+    <span style="font-size:15px;font-weight:700;color:#1a2332;">Weekly PUPC Report</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-table"></i>Weekly PUPC Excel Upload</div>
+    <div class="fg"><div class="fl">Station</div><div id="pupc-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="fg"><div class="fl">Week <span class="req">*</span></div>
+        <select class="fs" id="pupc-week" onchange="chkPupc()"><option value="">Week...</option><option>Week 1</option><option>Week 2</option><option>Week 3</option><option>Week 4</option></select></div>
+      <div class="fg"><div class="fl">Month <span class="req">*</span></div>
+        <select class="fs" id="pupc-month" onchange="chkPupc()"><option value="">Month...</option><option>January</option><option>February</option><option>March</option><option>April</option><option selected>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+    </div>
+    <div class="fg"><div class="fl">Year <span class="req">*</span></div>
+      <select class="fs" id="pupc-year" onchange="chkPupc()"><option value="">Year...</option><option>2025</option><option selected>2026</option><option>2027</option></select></div>
+    <div class="fg"><div class="fl">Upload PUPC Excel (.xlsx) <span class="req">*</span></div>
+      <div class="drop-zone" onclick="document.getElementById('pupc-fi').click()"><i class="ti ti-file-spreadsheet"></i><p>Tap to upload PUPC Excel file</p><small>.xlsx format only</small></div>
+      <div id="pupc-file-prev"></div>
+      <input type="file" id="pupc-fi" accept=".xlsx" style="display:none" onchange="handlePupcXlsx(this.files)">
+    </div>
+    <div id="pupc-data-preview" style="display:none;">
+      <div class="alert ok" style="margin-bottom:8px;"><i class="ti ti-circle-check"></i><span id="pupc-parse-msg">File loaded</span></div>
+      <div style="overflow-x:auto;margin-top:8px;">
+        <table id="pupc-preview-tbl" style="width:100%;border-collapse:collapse;font-size:10px;min-width:400px;">
+          <thead id="pupc-preview-head" style="background:#f0f4f8;"></thead>
+          <tbody id="pupc-preview-body"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="alert err" id="pupc-dup" style="display:none;"><i class="ti ti-alert-triangle"></i>Already submitted for this week.</div>
+  </div>
+  <button class="pbtn" id="pupc-btn" onclick="submitPupc()" disabled><i class="ti ti-send"></i>Submit Weekly PUPC</button>
+  <div class="proc" id="pupc-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+  <div id="pupc-done"></div>
+</div>
+
 <!-- CAMERA -->
 <div class="screen" id="scr-cam">
   <div style="display:flex;align-items:center;gap:10px;"><button class="gbtn" onclick="goMod('home')" style="padding:8px;"><i class="ti ti-arrow-left"></i></button><span style="font-size:15px;font-weight:700;color:#1a2332;">Inspection Camera</span></div>
@@ -524,6 +564,47 @@ document.addEventListener('touchstart',function(e){
       <div style="display:flex;gap:8px;margin-top:8px;"><button class="copy-btn" onclick="copyCamJson()"><i class="ti ti-copy"></i>Copy JSON</button><button class="gbtn" onclick="resetCam()"><i class="ti ti-refresh"></i>New</button></div>
     </div>
   </div>
+</div>
+
+<!-- WEEKLY PUPC -->
+<div class="screen" id="scr-pupc">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+    <button class="gbtn" onclick="goMod('home')" style="padding:8px;"><i class="ti ti-arrow-left"></i></button>
+    <span style="font-size:15px;font-weight:700;color:#1a2332;">Weekly PUPC Report</span>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-table-import"></i>Upload Weekly PUPC Excel</div>
+    <div class="alert info" style="margin-bottom:12px;"><i class="ti ti-info-circle"></i>Upload your station's weekly PUPC Excel report. Data will appear in the consolidated master report.</div>
+    <div class="fg"><div class="fl">Station</div><div id="pupc-stn" style="padding:10px 12px;border:1px solid #d0dce8;border-radius:12px;background:#f0f4f8;font-size:13px;font-weight:600;color:#1a2332;"></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="fg"><div class="fl">Week <span class="req">*</span></div>
+        <select class="fs" id="pupc-week" onchange="chkPupc()"><option value="">Week...</option><option>Week 1</option><option>Week 2</option><option>Week 3</option><option>Week 4</option></select></div>
+      <div class="fg"><div class="fl">Month <span class="req">*</span></div>
+        <select class="fs" id="pupc-month" onchange="chkPupc()"><option value="">Month...</option><option>January</option><option>February</option><option>March</option><option>April</option><option selected>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+      <div class="fg"><div class="fl">Year <span class="req">*</span></div>
+        <select class="fs" id="pupc-year" onchange="chkPupc()"><option value="">Year...</option><option>2025</option><option selected>2026</option><option>2027</option></select></div>
+      <div class="fg"><div class="fl">Nr of PUPC <span class="req">*</span></div>
+        <input type="number" class="fi" id="pupc-count" min="0" placeholder="0" oninput="chkPupc()"></div>
+    </div>
+    <div class="fg"><div class="fl">Upload Excel (.xlsx) <span class="req">*</span></div>
+      <div class="drop-zone" onclick="document.getElementById('pupc-fi').click()"><i class="ti ti-file-spreadsheet"></i><p>Tap to upload PUPC Excel file</p><small>.xlsx format</small></div>
+      <div id="pupc-file-prev"></div>
+      <input type="file" id="pupc-fi" accept=".xlsx" style="display:none" onchange="handlePupcXlsx(this.files)">
+    </div>
+    <div id="pupc-data-preview" style="display:none;margin-top:8px;">
+      <div class="alert ok" style="margin-bottom:8px;"><i class="ti ti-circle-check"></i><span id="pupc-parse-msg">File parsed successfully</span></div>
+      <div class="card" style="background:#f8fafc;padding:10px;">
+        <div style="font-size:11px;font-weight:600;color:#5a6a7a;margin-bottom:6px;">Preview (first 5 rows)</div>
+        <div id="pupc-table-wrap" style="overflow-x:auto;"></div>
+      </div>
+    </div>
+    <div class="alert err" id="pupc-dup" style="display:none;margin-top:8px;"><i class="ti ti-alert-triangle"></i>Already submitted for this week.</div>
+  </div>
+  <button class="pbtn" id="pupc-btn" onclick="submitPupc()" disabled><i class="ti ti-send"></i>Submit Weekly PUPC</button>
+  <div class="proc" id="pupc-proc"><div class="proc-dots"><div class="proc-dot"></div><div class="proc-dot"></div><div class="proc-dot"></div></div></div>
+  <div id="pupc-done"></div>
 </div>
 
 <!-- MASTER REPORT -->
@@ -580,6 +661,11 @@ document.addEventListener('touchstart',function(e){
       </div>
     </div>
     <div class="sec-lbl">Submission notifications</div>
+    <div class="notif-card"><div class="notif-title"><i class="ti ti-table"></i>Weekly PUPC Reports</div>
+      <div class="prog-wrap"><div class="prog-bar" id="pupc-bar" style="width:0%"></div></div>
+      <div class="prog-nums"><span id="pupc-txt">0 of 27 stations submitted</span><span id="pupc-pct">0%</span></div>
+      <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:2px;" id="pupc-pills"></div>
+    </div>
     <div class="notif-card"><div class="notif-title"><i class="ti ti-users"></i>Monthly PHROs &amp; COs</div>
       <div class="prog-wrap"><div class="prog-bar" id="phros-bar" style="width:0%"></div></div>
       <div class="prog-nums"><span id="phros-txt">0 of 27</span><span id="phros-pct">0%</span></div>
@@ -600,6 +686,16 @@ document.addEventListener('touchstart',function(e){
     </div>
     <div class="sec-lbl">Per-station submissions</div>
     <div class="card" style="padding:0;overflow:hidden;"><div class="master-scroll"><table class="master-tbl"><thead><tr><th>Station</th><th>PICE</th><th>Parts.</th><th>Medical</th><th>PHROs</th><th>IDD F1</th><th>IDD F2</th><th>Flag</th></tr></thead><tbody id="master-tbody"></tbody></table></div><div id="master-empty" style="padding:14px;text-align:center;font-size:12px;color:#94a3b8;">No submissions yet.</div></div>
+    <div class="sec-lbl">Weekly PUPC — Consolidated</div>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div class="master-scroll">
+        <table class="master-tbl" id="pupc-consol-tbl">
+          <thead><tr><th>Station</th><th>Week</th><th>Month</th><th>Year</th><th>File</th><th>Rows</th><th>Submitted</th></tr></thead>
+          <tbody id="pupc-consol-body"></tbody>
+        </table>
+      </div>
+      <div id="pupc-consol-empty" style="padding:14px;text-align:center;font-size:12px;color:#94a3b8;">No PUPC submissions yet.</div>
+    </div>
     <div class="card"><div class="card-title"><i class="ti ti-file-certificate"></i>Generate master copy</div>
       <div class="alert info" style="margin-bottom:10px;"><i class="ti ti-info-circle"></i>Official BULPPO format Weekly PICE consolidated report with action photos.</div>
       <button class="sbtn" id="gen-btn" onclick="genMaster()"><i class="ti ti-file-certificate"></i>Generate master copy</button>
@@ -618,6 +714,8 @@ document.addEventListener('touchstart',function(e){
     <button class="bn" id="bn-pice" onclick="goMod('pice')"><i class="ti ti-calendar-week"></i><span>PICE</span></button>
     <button class="bn" id="bn-med" onclick="goMod('med')"><i class="ti ti-stethoscope"></i><span>Medical</span></button>
     <button class="bn" id="bn-phros" onclick="goMod('phros')"><i class="ti ti-users"></i><span>PHROs</span><div class="nb-badge" id="phros-badge"></div></button>
+    <button class="bn" id="bn-pupc" onclick="goMod('pupc')"><i class="ti ti-table"></i><span>PUPC</span><div class="nb-badge" id="pupc-badge"></div></button>
+    <button class="bn" id="bn-pupc" onclick="goMod('pupc')"><i class="ti ti-table-import"></i><span>PUPC</span><div class="nb-badge" id="pupc-badge"></div></button>
     <button class="bn" id="bn-idd" onclick="goMod('idd')"><i class="ti ti-file-description"></i><span>IDD</span><div class="nb-badge" id="idd-badge"></div></button>
     <button class="bn" id="bn-cam" onclick="goMod('cam')"><i class="ti ti-camera"></i><span>Cam</span></button>
     <button class="bn" id="bn-master" onclick="goMod('master')"><i class="ti ti-file-certificate"></i><span>Master</span></button>
@@ -1193,7 +1291,7 @@ function updateIddNotif(){
 // ═══════════════════════════════════════════════════════
 // PUPC WEEKLY MODULE
 // ═══════════════════════════════════════════════════════
-let pupcFile=null,pupcWeek='',pupcMonthVal='';
+let pupcFile=null,pupcWeek='',pupcMonthVal='';let pupcRows=[];
 
 function handlePupcXlsx(files){
   if(!files||!files[0])return;
@@ -1415,7 +1513,7 @@ function buildMasterView(){
   if(role!=='super'){document.getElementById('master-denied').style.display='flex';document.getElementById('master-body').style.display='none';return;}
   document.getElementById('master-denied').style.display='none';
   const mb=document.getElementById('master-body');mb.style.display='flex';mb.style.flexDirection='column';
-  updatePhrosNotif();updateIddNotif();buildMaster();
+  updatePhrosNotif();updateIddNotif();updatePupcNotif();buildMaster();buildPupcConsolidated();
   buildPupcMaster();
   buildConcernsList();
   updateAuditDisplay();
@@ -1616,6 +1714,197 @@ function rnd(){return Math.floor(Math.random()*900+100);}
     ['1ST PMFC','2ND PMFC','ANGAT MPS','BALAGTAS MPS','BALIWAG CPS','BOCAUE MPS','BULAKAN MPS','BUSTOS MPS','CALUMPIT MPS','DRT MPS','GUIGUINTO MPS','HAGONOY MPS','MALOLOS CPS','MARILAO MPS','MEYCAUAYAN CPS','NORZAGARAY MPS','OBANDO MPS','PANDI MPS','PAOMBONG MPS','PLARIDEL MPS','PULILAN MPS','SAN ILDEFONSO MPS','SAN MIGUEL MPS','SAN RAFAEL MPS','SANTA MARIA MPS','SJDM CPS','PHQ'].forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
   }
 })();
+
+// ═══════════════════════════════════════════════════════
+// WEEKLY PUPC MODULE
+// ═══════════════════════════════════════════════════════
+
+function handlePupcXlsx(files){
+  if(!files||!files[0])return;
+  pupcFile=files[0];
+  const pp=document.getElementById('pupc-file-prev');
+  pp.innerHTML='';
+  const pd=document.createElement('div');pd.className='file-prev';
+  const icon=document.createElement('i');icon.className='ti ti-file-spreadsheet';
+  const nm=document.createElement('span');nm.className='fp-n';nm.textContent=pupcFile.name;
+  const rb=document.createElement('button');rb.className='fp-r';rb.textContent='Remove';
+  rb.onclick=function(){
+    pupcFile=null;pupcRows=[];pp.innerHTML='';
+    var dpv=document.getElementById('pupc-data-preview');
+    if(dpv)dpv.style.display='none';
+    chkPupc();
+  };
+  pd.appendChild(icon);pd.appendChild(nm);pd.appendChild(rb);pp.appendChild(pd);
+
+  // Read with FileReader and parse with SheetJS if available, else show filename only
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      if(typeof XLSX !== 'undefined'){
+        var wb=XLSX.read(e.target.result,{type:'array'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+        pupcRows=rows;
+        pupcRows=rows;renderPupcPreview(rows);
+      } else {
+        // No SheetJS — just show file loaded message
+        var dpv=document.getElementById('pupc-data-preview');
+        var msg=document.getElementById('pupc-parse-msg');
+        if(msg)msg.textContent='File ready: '+pupcFile.name+' ('+Math.round(pupcFile.size/1024)+'KB)';
+        if(dpv)dpv.style.display='block';
+        var thead=document.getElementById('pupc-preview-head');
+        var tbody=document.getElementById('pupc-preview-body');
+        if(thead)thead.innerHTML='';
+        if(tbody)tbody.innerHTML='<tr><td style="padding:8px;color:#7a8a9a;font-size:11px;">Preview not available — file will be submitted as-is.</td></tr>';
+      }
+    }catch(err){
+      var dpv=document.getElementById('pupc-data-preview');
+      var msg=document.getElementById('pupc-parse-msg');
+      if(msg)msg.textContent='File ready: '+pupcFile.name;
+      if(dpv)dpv.style.display='block';
+    }
+    chkPupc();
+  };
+  reader.readAsArrayBuffer(pupcFile);
+}
+
+function renderPupcPreview(rows){
+  var dpv=document.getElementById('pupc-data-preview');
+  var msg=document.getElementById('pupc-parse-msg');
+  var thead=document.getElementById('pupc-preview-head');
+  var tbody=document.getElementById('pupc-preview-body');
+  if(!dpv||!thead||!tbody)return;
+
+  var validRows=rows.filter(function(r){return r.some(function(c){return String(c).trim()!=='';});});
+  if(msg)msg.textContent='File loaded — '+validRows.length+' rows found in '+pupcFile.name;
+
+  // Header row
+  if(validRows.length>0){
+    var htr=document.createElement('tr');
+    validRows[0].forEach(function(cell){
+      var th=document.createElement('th');
+      th.style.cssText='padding:5px 7px;text-align:left;font-size:9px;font-weight:700;color:#7a8a9a;border-bottom:1px solid #d0dce8;background:#f8fafc;text-transform:uppercase;white-space:nowrap;';
+      th.textContent=String(cell||'').substring(0,20);
+      htr.appendChild(th);
+    });
+    thead.innerHTML='';
+    thead.appendChild(htr);
+  }
+
+  // Data rows (max 10 preview)
+  tbody.innerHTML='';
+  var dataRows=validRows.slice(1,11);
+  dataRows.forEach(function(row,ri){
+    var tr=document.createElement('tr');
+    tr.style.background=ri%2===0?'#fff':'#f8fafc';
+    row.forEach(function(cell){
+      var td=document.createElement('td');
+      td.style.cssText='padding:5px 7px;font-size:10px;color:#5a6a7a;border-bottom:.5px solid #f0f4f8;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;';
+      td.textContent=String(cell||'').substring(0,30);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  if(validRows.length>11){
+    var tr=document.createElement('tr');
+    var td=document.createElement('td');
+    td.colSpan=validRows[0].length;
+    td.style.cssText='padding:6px 7px;font-size:10px;color:#94a3b8;text-align:center;';
+    td.textContent='... and '+(validRows.length-11)+' more rows';
+    tr.appendChild(td);tbody.appendChild(tr);
+  }
+
+  dpv.style.display='block';
+}
+
+function chkPupc(){
+  var w=document.getElementById('pupc-week').value;
+  var m=document.getElementById('pupc-month').value;
+  var y=document.getElementById('pupc-year').value;
+  var dup=records.find(function(r){return r.mod==='pupc'&&r.station===myStation&&r.week===w&&r.month===m&&r.year===y;});
+  var dupEl=document.getElementById('pupc-dup');
+  if(dupEl)dupEl.style.display=dup?'flex':'none';
+  var btn=document.getElementById('pupc-btn');
+  if(btn)btn.disabled=!(w&&m&&y&&pupcFile&&!dup);
+}
+
+async function submitPupc(){
+  var w=document.getElementById('pupc-week').value;
+  var m=document.getElementById('pupc-month').value;
+  var y=document.getElementById('pupc-year').value;
+  var btn=document.getElementById('pupc-btn');
+  btn.disabled=true;
+  document.getElementById('pupc-proc').style.display='block';
+  await sleep(1200);
+  document.getElementById('pupc-proc').style.display='none';
+
+  var rec={
+    mod:'pupc',station:myStation,week:w,month:m,year:y,
+    filename:pupcFile.name,filesize:pupcFile.size,
+    rowCount:pupcRows.length,data:pupcRows,
+    submittedBy:userId,ts:new Date().toISOString(),flag:false
+  };
+  records.push(rec);
+
+  var label=myStation+' — PUPC '+w+' · '+m+' '+y+' · '+pupcFile.name;
+  addActivity('pupc',false,label);
+  buildHomeStats();
+
+  // Update PUPC badge in master
+  updatePupcNotif();
+
+  var payload=JSON.stringify({module:'Weekly PUPC',station:myStation,week:w,month:m,year:y,file:pupcFile.name,rows:pupcData.length,submittedBy:userId,timestamp:rec.ts},null,2);
+  var done=document.getElementById('pupc-done');
+  done.innerHTML='';
+  var card=document.createElement('div');card.className='card';card.style.textAlign='center';
+  var iconEl=document.createElement('i');iconEl.className='ti ti-circle-check';iconEl.style.cssText='font-size:44px;color:#3B6D11;display:block;margin-bottom:8px;';
+  var title=document.createElement('div');title.style.cssText='font-size:16px;font-weight:700;color:#1a2332;margin-bottom:5px;';title.textContent='Submitted';
+  var sub=document.createElement('p');sub.style.cssText='font-size:12px;color:#7a8a9a;margin-bottom:12px;';sub.textContent=label;
+  var jbox=document.createElement('div');jbox.className='json-box';jbox.textContent=payload;
+  var cpBtn=document.createElement('button');cpBtn.className='copy-btn';cpBtn.style.marginTop='8px';
+  cpBtn.innerHTML='<i class="ti ti-copy"></i>Copy';
+  cpBtn.onclick=function(){navigator.clipboard.writeText(payload);};
+  card.appendChild(iconEl);card.appendChild(title);card.appendChild(sub);card.appendChild(jbox);card.appendChild(cpBtn);
+  done.appendChild(card);
+
+  addAudit('submit:pupc');
+}
+
+function updatePupcNotif(){
+  var submitted=new Set(records.filter(function(r){return r.mod==='pupc';}).map(function(r){return r.station;}));
+  var cnt=submitted.size,total=27,pct=Math.round(cnt/total*100);
+  var bar=document.getElementById('pupc-bar');
+  if(bar){bar.style.width=pct+'%';bar.className='prog-bar'+(pct===100?' full':pct<30?' low':'');}
+  var txt=document.getElementById('pupc-txt');if(txt)txt.textContent=cnt+' of '+total+' stations submitted';
+  var pctEl=document.getElementById('pupc-pct');if(pctEl)pctEl.textContent=pct+'%';
+  var pills=document.getElementById('pupc-pills');
+  if(pills){pills.innerHTML='';submitted.forEach(function(s){var sp=document.createElement('span');sp.className='stn-pill sp-g';sp.textContent=s;pills.appendChild(sp);});}
+  var badge=document.getElementById('pupc-badge');
+  var missing=STNS.filter(function(s){return !submitted.has(s);});
+  if(badge){badge.textContent=missing.length;badge.classList.toggle('show',missing.length>0);}
+}
+
+
+function buildPupcConsolidated(){
+  var pupcRecs=records.filter(function(r){return r.mod==='pupc';});
+  var tbody=document.getElementById('pupc-consol-body');
+  var empty=document.getElementById('pupc-consol-empty');
+  if(!tbody)return;
+  tbody.innerHTML='';
+  if(!pupcRecs.length){if(empty)empty.style.display='block';return;}
+  if(empty)empty.style.display='none';
+  pupcRecs.forEach(function(r){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><span class="stn-pill sp-b">'+r.station+'</span></td>'+
+      '<td>'+r.week+'</td><td>'+r.month+'</td><td>'+r.year+'</td>'+
+      '<td style="font-size:9px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+r.filename+'</td>'+
+      '<td style="text-align:center;">'+r.rowCount+'</td>'+
+      '<td style="font-size:9px;color:#94a3b8;">'+r.ts.substring(0,10)+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
 window.addEventListener('load',checkGuestMode);
 </script>
 </body>
