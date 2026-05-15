@@ -1510,93 +1510,275 @@ function buildMaster(){
 
 
 async function genMaster(){
-  const piceRecs=records.filter(r=>r.mod==='pice');
+  var piceRecs=records.filter(function(r){return r.mod==='pice';});
   if(!piceRecs.length){alert('No Weekly PICE submissions yet.');return;}
-  document.getElementById('gen-btn').disabled=true;document.getElementById('gen-proc').style.display='block';
-  await sleep(1500);document.getElementById('gen-proc').style.display='none';
-  const fm=document.getElementById('f-month')?.value||'May';
-  const totalP=piceRecs.reduce((a,r)=>a+(r.pice||0),0);
-  const totalPa=piceRecs.reduce((a,r)=>a+(r.part||0),0);
-  const week=piceRecs[0]?.week||'Week 1';
-  const rows=STNS.map(stn=>{const sub=piceRecs.find(r=>r.station===stn);return '<tr><td class="stn">'+stn+'</td><td style="text-align:center;padding:3px 4px;">'+(sub?.photoURL?'<img class="doc-photo" src="'+sub.photoURL+'">':'<div style="width:46px;height:32px;border:1px dashed #BDD7EE;border-radius:2px;background:#f0f4f8;margin:auto;display:flex;align-items:center;justify-content:center;font-size:7px;color:#94a3b8;">No photo</div>')+'</td><td class="num">'+(sub?.pice||'—')+'</td><td class="num">'+(sub?.part||'—')+'</td></tr>';}).join('');
-  const go=document.getElementById('gen-out');go.style.display='flex';go.style.flexDirection='column';
-  go.innerHTML='<div class="alert ok"><i class="ti ti-circle-check"></i>Master copy generated.</div>'+
-    '<div class="pice-wrap"><div class="doc-inner">'+
-    '<div class="doc-conf">CONFIDENTIAL</div>'+
-    '<div class="doc-title">Bulacan PPO: <u>Human Rights</u> Reminders for the Month of <u>'+fm+'</u> 2026</div>'+
-    '<table class="doc-tbl"><thead><tr><th style="width:28%;text-align:left;">Station / Units</th><th style="width:36%;">Action Photo</th><th style="width:18%;">Nr of PICE Conducted</th><th style="width:18%;">No. of Participants</th></tr></thead>'+
-    '<tbody>'+rows+'<tr class="tot"><td colspan="2" style="text-align:right;font-size:8px;padding-right:8px;"><strong>Total:</strong></td><td><strong>'+totalP+'</strong></td><td><strong>'+totalPa+'</strong></td></tr></tbody></table>'+
-    '<div class="doc-motto"><em>"Bagong PNP para sa Bagong Pilipinas; Serbisyong Mabilis, Tapat, at Nararamdaman"</em></div>'+
-    '<div class="doc-conf" style="margin-top:7px;">CONFIDENTIAL</div>'+
+  document.getElementById('gen-btn').disabled=true;
+  document.getElementById('gen-proc').style.display='block';
+  await sleep(1500);
+  document.getElementById('gen-proc').style.display='none';
+
+  var fm=document.getElementById('f-month')?.value||'May';
+  var fy=document.getElementById('f-year')?.value||'2026';
+
+  // Get latest submission per station
+  var latestByStation={};
+  piceRecs.forEach(function(r){
+    if(!latestByStation[r.station]||r.ts>latestByStation[r.station].ts){
+      latestByStation[r.station]=r;
+    }
+  });
+
+  // Build date range from submitted data
+  var weeks=[...new Set(piceRecs.map(function(r){return r.week;}))];
+  var weekLabel=weeks.length===1?weeks[0]:weeks.join(', ');
+
+  // Calculate totals
+  var totalPice=piceRecs.reduce(function(a,r){return a+(r.pice||0);},0);
+  var totalPart=piceRecs.reduce(function(a,r){return a+(r.part||0);},0);
+
+  // Build HTML preview matching Word format exactly
+  var go=document.getElementById('gen-out');
+  go.style.display='flex';go.style.flexDirection='column';
+
+  // Build table rows
+  var tableRows='';
+  STNS.forEach(function(stn){
+    var sub=latestByStation[stn];
+    var photoCell=sub&&sub.photoURL
+      ?'<td style="text-align:center;padding:2px 3px;"><img src="'+sub.photoURL+'" style="width:90px;height:65px;object-fit:cover;"></td>'
+      :'<td style="text-align:center;padding:2px 3px;color:#bbb;font-size:8px;"></td>';
+    var piceCell=sub?'<td style="text-align:center;font-weight:700;font-size:9px;padding:3px;">'+sub.pice+'</td>':'<td style="text-align:center;color:#bbb;font-size:9px;padding:3px;">—</td>';
+    var partCell=sub?'<td style="text-align:center;font-weight:700;font-size:9px;padding:3px;">'+sub.part+'</td>':'<td style="text-align:center;color:#bbb;font-size:9px;padding:3px;">—</td>';
+    tableRows+='<tr style="border-bottom:1px solid #BDD7EE;"><td style="font-size:8.5px;font-weight:700;padding:3px 5px;background:#DEEAF1;">'+stn+'</td>'+photoCell+piceCell+partCell+'</tr>';
+  });
+
+  go.innerHTML='<div class="alert ok"><i class="ti ti-circle-check"></i>Master copy generated — '+Object.keys(latestByStation).length+' of 27 stations</div>'+
+    '<div style="background:#f5f5f5;border-radius:10px;padding:10px;">'+
+    '<div style="background:#fff;border:.5px solid #ccc;border-radius:4px;padding:16px 20px;box-shadow:0 2px 8px rgba(0,0,0,.08);">'+
+    '<p style="font-size:9px;font-weight:700;text-align:center;letter-spacing:1px;color:#A32D2D;margin-bottom:6px;">CONFIDENTIAL</p>'+
+    '<p style="font-size:10.5px;font-weight:700;text-align:center;color:#1a1a1a;margin-bottom:10px;">Bulacan PPO: <u>Human Rights</u> Reminders for the Month of <u>'+fm+'</u> '+fy+'</p>'+
+    '<table style="width:100%;border-collapse:collapse;font-size:9px;">'+
+    '<thead>'+
+    '<tr style="background:#1F4E79;color:#fff;">'+
+    '<td colspan="4" style="font-size:8px;padding:5px 6px;font-weight:400;">Attached were the consolidated action taken of different respective Police Human Rights Officers of municipal/city police stations and PMFCs of this PPO pertaining to the dissemination of Human Rights Reminders during the conduct of DPPA/PICE ('+weekLabel+', '+fm+' '+fy+').</td>'+
+    '</tr>'+
+    '<tr style="background:#1F4E79;color:#fff;">'+
+    '<th style="padding:6px 8px;text-align:left;width:28%;border:.5px solid #2d6aa0;">Station / Units</th>'+
+    '<th style="padding:6px 8px;text-align:center;width:36%;border:.5px solid #2d6aa0;">Action Photo</th>'+
+    '<th style="padding:6px 8px;text-align:center;width:18%;border:.5px solid #2d6aa0;">Nr of PICE Conducted</th>'+
+    '<th style="padding:6px 8px;text-align:center;width:18%;border:.5px solid #2d6aa0;">No. of Participants</th>'+
+    '</tr></thead>'+
+    '<tbody>'+tableRows+
+    '<tr style="background:#1F4E79;color:#fff;font-weight:700;">'+
+    '<td colspan="2" style="padding:5px 8px;font-size:8px;text-align:right;">Total Nr of PICE Conducted and Nr of Participants:</td>'+
+    '<td style="padding:5px 8px;text-align:center;">'+totalPice+'</td>'+
+    '<td style="padding:5px 8px;text-align:center;">'+totalPart+'</td>'+
+    '</tr></tbody></table>'+
+    '<p style="font-size:7.5px;font-style:italic;text-align:center;margin-top:8px;color:#444;">"Bagong PNP para sa Bagong Pilipinas; Serbisyong Mabilis, Tapat, at Nararamdaman"</p>'+
+    '<p style="font-size:9px;font-weight:700;text-align:center;letter-spacing:1px;color:#A32D2D;margin-top:6px;">CONFIDENTIAL</p>'+
     '</div></div>'+
-    '<button class="gbtn" style="width:100%;justify-content:center;" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>';
+    '<div style="display:flex;gap:8px;">'+
+    '<button class="gbtn" style="flex:1;justify-content:center;" onclick="window.print()"><i class="ti ti-printer"></i>Print</button>'+
+    '<button class="sbtn" style="flex:1;" onclick="downloadPiceDocx()"><i class="ti ti-download"></i>Download .docx</button>'+
+    '</div>';
+
   document.getElementById('gen-btn').disabled=false;
   addAudit('gen-master');
 }
 
-// ═══════════════════════════════════════════════════════
-// GUEST CONCERNS + QR
-// ═══════════════════════════════════════════════════════
-function checkGuestMode(){
-  const p=new URLSearchParams(window.location.search);
-  const stn=p.get('station'),tok=p.get('token');
-  if(stn&&tok==='GUEST-2025'){showGuestForm(decodeURIComponent(stn));}
+async function downloadPiceDocx(){
+  var piceRecs=records.filter(function(r){return r.mod==='pice';});
+  var fm=document.getElementById('f-month')?.value||'May';
+  var fy=document.getElementById('f-year')?.value||'2026';
+  var weeks=[...new Set(piceRecs.map(function(r){return r.week;}))];
+  var weekLabel=weeks.length===1?weeks[0]:weeks.join(', ');
+
+  // Get latest per station
+  var latestByStation={};
+  piceRecs.forEach(function(r){
+    if(!latestByStation[r.station]||r.ts>latestByStation[r.station].ts){
+      latestByStation[r.station]=r;
+    }
+  });
+  var totalPice=piceRecs.reduce(function(a,r){return a+(r.pice||0);},0);
+  var totalPart=piceRecs.reduce(function(a,r){return a+(r.part||0);},0);
+
+  // Build docx using docx.js loaded from CDN
+  var script=document.getElementById('docx-cdn-script');
+  if(!script){
+    script=document.createElement('script');
+    script.id='docx-cdn-script';
+    script.src='https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.min.js';
+    document.head.appendChild(script);
+    await new Promise(function(res){script.onload=res;script.onerror=function(){res();};});
+  }
+
+  if(typeof docx==='undefined'){
+    // Fallback: download as HTML
+    var html='<html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;margin:40px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #BDD7EE;padding:6px 8px;font-size:9pt;}th{background:#1F4E79;color:#fff;}td.stn{background:#DEEAF1;font-weight:700;}img{width:90px;height:65px;object-fit:cover;}.conf{color:#A32D2D;font-weight:700;text-align:center;letter-spacing:1px;}.total{background:#1F4E79;color:#fff;font-weight:700;}</style></head><body>';
+    html+='<p class="conf">CONFIDENTIAL</p>';
+    html+='<p style="text-align:center;font-weight:700;">Bulacan PPO: <u>Human Rights</u> Reminders for the Month of <u>'+fm+'</u> '+fy+'</p>';
+    html+='<table><thead><tr style="background:#1F4E79;color:#fff;"><td colspan="4" style="font-size:8pt;font-weight:400;">Attached were the consolidated action taken of different respective Police Human Rights Officers of municipal/city police stations and PMFCs of this PPO pertaining to the dissemination of Human Rights Reminders during the conduct of DPPA/PICE ('+weekLabel+', '+fm+' '+fy+').</td></tr>';
+    html+='<tr><th>Station / Units</th><th>Action Photo</th><th>Nr of PICE Conducted</th><th>No. of Participants</th></tr></thead><tbody>';
+    STNS.forEach(function(stn){
+      var sub=latestByStation[stn];
+      var photo=sub&&sub.photoURL?'<img src="'+sub.photoURL+'">':'';
+      html+='<tr><td class="stn">'+stn+'</td><td style="text-align:center;">'+photo+'</td><td style="text-align:center;font-weight:700;">'+(sub?sub.pice:'')+'</td><td style="text-align:center;font-weight:700;">'+(sub?sub.part:'')+'</td></tr>';
+    });
+    html+='<tr class="total"><td colspan="2" style="text-align:right;font-size:8pt;">Total Nr of PICE Conducted and Nr of Participants:</td><td style="text-align:center;">'+totalPice+'</td><td style="text-align:center;">'+totalPart+'</td></tr>';
+    html+='</tbody></table><p style="font-style:italic;font-size:8pt;text-align:center;">"Bagong PNP para sa Bagong Pilipinas; Serbisyong Mabilis, Tapat, at Nararamdaman"</p><p class="conf">CONFIDENTIAL</p></body></html>';
+    var blob=new Blob([html],{type:'text/html'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='PICE_Consolidated_'+fm+'_'+fy+'.html';a.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+
+  // Build proper docx
+  var {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,AlignmentType,WidthType,BorderStyle,ShadingType,VerticalAlign,ImageRun,Header}=docx;
+  var border={style:BorderStyle.SINGLE,size:4,color:'BDD7EE'};
+  var borders={top:border,bottom:border,left:border,right:border};
+  var headerBorder={style:BorderStyle.SINGLE,size:4,color:'2D6AA0'};
+  var headerBorders={top:headerBorder,bottom:headerBorder,left:headerBorder,right:headerBorder};
+  var cellMar={top:80,bottom:80,left:120,right:120};
+
+  // Total table width: Letter 12240 - 2880 margins = 9360 DXA
+  // Columns: Station 2808, Photo 3312, PICE 1620, Parts 1620 = 9360
+  var colWidths=[2808,3312,1620,1620];
+  var tblW=9360;
+
+  function hdrCell(text,w){
+    return new TableCell({
+      borders:headerBorders,
+      width:{size:w,type:WidthType.DXA},
+      margins:cellMar,
+      shading:{fill:'1F4E79',type:ShadingType.CLEAR},
+      verticalAlign:VerticalAlign.CENTER,
+      children:[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:text,bold:true,color:'FFFFFF',font:'Arial',size:18})]})]
+    });
+  }
+
+  function dataCell(text,w,opts){
+    opts=opts||{};
+    return new TableCell({
+      borders:borders,
+      width:{size:w,type:WidthType.DXA},
+      margins:cellMar,
+      shading:opts.bg?{fill:opts.bg,type:ShadingType.CLEAR}:{fill:'FFFFFF',type:ShadingType.CLEAR},
+      verticalAlign:VerticalAlign.CENTER,
+      children:[new Paragraph({
+        alignment:opts.center?AlignmentType.CENTER:AlignmentType.LEFT,
+        children:[new TextRun({text:String(text||''),bold:opts.bold||false,font:'Arial',size:18})]
+      })]
+    });
+  }
+
+  // Build station rows
+  var stationRows=[];
+  for(var si=0;si<STNS.length;si++){
+    var stn=STNS[si];
+    var sub=latestByStation[stn];
+    var photoCells=[];
+    if(sub&&sub.photoURL){
+      // Convert base64 to Uint8Array
+      var b64=sub.photoURL.split(',')[1];
+      var bstr=atob(b64);
+      var bytes=new Uint8Array(bstr.length);
+      for(var bi=0;bi<bstr.length;bi++)bytes[bi]=bstr.charCodeAt(bi);
+      photoCells=[new Paragraph({alignment:AlignmentType.CENTER,children:[new ImageRun({data:bytes,transformation:{width:100,height:72},type:'jpg'})]})];
+    } else {
+      photoCells=[new Paragraph({children:[new TextRun({text:'',font:'Arial',size:18})]})];
+    }
+    stationRows.push(new TableRow({
+      children:[
+        new TableCell({borders:borders,width:{size:colWidths[0],type:WidthType.DXA},margins:cellMar,shading:{fill:'DEEAF1',type:ShadingType.CLEAR},verticalAlign:VerticalAlign.CENTER,children:[new Paragraph({children:[new TextRun({text:stn,bold:true,font:'Arial',size:18})]})]}),
+        new TableCell({borders:borders,width:{size:colWidths[1],type:WidthType.DXA},margins:{top:40,bottom:40,left:60,right:60},shading:{fill:'FFFFFF',type:ShadingType.CLEAR},verticalAlign:VerticalAlign.CENTER,children:photoCells}),
+        dataCell(sub?String(sub.pice):'',colWidths[2],{center:true,bold:!!sub}),
+        dataCell(sub?String(sub.part):'',colWidths[3],{center:true,bold:!!sub}),
+      ]
+    }));
+  }
+
+  // Total row
+  var totalRow=new TableRow({children:[
+    new TableCell({
+      columnSpan:2,
+      borders:headerBorders,
+      width:{size:colWidths[0]+colWidths[1],type:WidthType.DXA},
+      margins:cellMar,
+      shading:{fill:'1F4E79',type:ShadingType.CLEAR},
+      verticalAlign:VerticalAlign.CENTER,
+      children:[new Paragraph({alignment:AlignmentType.RIGHT,children:[new TextRun({text:'Total Nr of PICE Conducted and Nr of Participants:',bold:true,color:'FFFFFF',font:'Arial',size:18})]})]
+    }),
+    dataCell(String(totalPice),colWidths[2],{center:true,bold:true,bg:'1F4E79'}),
+    dataCell(String(totalPart),colWidths[3],{center:true,bold:true,bg:'1F4E79'}),
+  ]});
+  // Fix total row text colors
+  totalRow.cells[1].children[0].children[0].children[0].color='FFFFFF';
+  totalRow.cells[2].children[0].children[0].children[0].color='FFFFFF';
+
+  var doc=new Document({
+    sections:[{
+      properties:{page:{size:{width:12240,height:15840},margin:{top:1080,right:1080,bottom:1080,left:1080}}},
+      headers:{default:new Header({children:[
+        new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:'CONFIDENTIAL',bold:true,color:'4F81BD',font:'Arial Black',size:24})]})
+      ]})},
+      children:[
+        new Paragraph({alignment:AlignmentType.CENTER,children:[
+          new TextRun({text:'Bulacan PPO: ',bold:true,font:'Arial',size:22}),
+          new TextRun({text:'Human Rights',bold:true,underline:{},font:'Arial',size:22}),
+          new TextRun({text:' Reminders for the Month of ',bold:true,font:'Arial',size:22}),
+          new TextRun({text:fm,bold:true,underline:{},font:'Arial',size:22}),
+          new TextRun({text:' '+fy,bold:true,font:'Arial',size:22}),
+        ]}),
+        new Paragraph({children:[]}),
+        new Table({
+          width:{size:tblW,type:WidthType.DXA},
+          columnWidths:colWidths,
+          rows:[
+            // Intro row (full width)
+            new TableRow({children:[
+              new TableCell({
+                columnSpan:4,
+                borders:headerBorders,
+                width:{size:tblW,type:WidthType.DXA},
+                margins:cellMar,
+                shading:{fill:'2E75B6',type:ShadingType.CLEAR},
+                children:[new Paragraph({children:[new TextRun({text:'Attached were the consolidated action taken of different respective Police Human Rights Officers of municipal/ city police stations and PMFCs of this PPO pertaining to the dissemination of Human Rights Reminders during the conduct of DPPA/PICE ('+weekLabel+', '+fm+' '+fy+').',color:'FFFFFF',font:'Arial',size:18})]})]
+              })
+            ]}),
+            // Header row
+            new TableRow({children:[
+              hdrCell('Station / Units',colWidths[0]),
+              hdrCell('Action Photo',colWidths[1]),
+              hdrCell('Nr of PICE Conducted',colWidths[2]),
+              hdrCell('No. of Participants',colWidths[3]),
+            ]}),
+            ...stationRows,
+            totalRow,
+          ]
+        }),
+        new Paragraph({children:[]}),
+        new Paragraph({alignment:AlignmentType.CENTER,children:[
+          new TextRun({text:'“Bagong PNP para sa Bagong Pilipinas; Serbisyong Mabilis, Tapat, at Nararamdaman”',italics:true,font:'Arial',size:18})
+        ]}),
+        new Paragraph({alignment:AlignmentType.CENTER,children:[
+          new TextRun({text:'CONFIDENTIAL',bold:true,color:'4F81BD',font:'Arial Black',size:22})
+        ]}),
+      ]
+    }]
+  });
+
+  var buf=await Packer.toBuffer(doc);
+  var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;
+  a.download='PICE_Consolidated_'+fm+'_'+fy+'.docx';
+  a.click();
+  URL.revokeObjectURL(url);
 }
-function showGuestForm(station){
-  const gw=document.getElementById('guest-wrap');
-  gw.style.display='flex';gw.style.flexDirection='column';
-  let gcType='';
-  gw.innerHTML='<div class="gc-hdr">'+
-    '<div style="width:52px;height:52px;border-radius:50%;background:#fff;margin:0 auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;">'+
-    '<span style="font-size:13px;font-weight:700;color:#0C447C;line-height:1;">HuGo</span><span style="font-size:7px;color:#185FA5;">BULPPO</span></div>'+
-    '<div style="font-size:17px;font-weight:700;margin-bottom:4px;">Iulat ang Inyong Reklamo</div>'+
-    '<div style="font-size:11px;color:#B5D4F4;">Bulacan Police Provincial Office · Human Rights Affairs</div></div>'+
-    '<div class="gc-body">'+
-    '<div class="card"><div class="alert ok" style="margin-bottom:10px;"><i class="ti ti-shield-check"></i><div><strong>Kumpidensyal at Protektado</strong><br><span style="font-size:10.5px;">Maaari kayong mag-ulat nang hindi nagpapakilala.</span></div></div>'+
-    '<div class="fl" style="margin-bottom:4px;">Himpilan ng Pulisya</div><div style="padding:10px 12px;border:1px solid #d0dce8;border-radius:10px;background:#f0f4f8;font-size:13px;font-weight:600;color:#0C447C;">'+station+'</div></div>'+
-    '<div class="card"><div class="fl" style="margin-bottom:8px;">Uri ng Reklamo <span class="req">*</span></div>'+
-    '<div class="gc-type-grid" id="gc-types">'+
-    ['⚠ Paglabag sa Karapatang Pantao','👤 Kapakanan ng Detinido','🏠 Kondisyon ng Pasilidad','👮 Ugali ng Tauhan','🏥 Medikal na Alalahanin','📝 Iba pa'].map((t,i)=>
-      '<button class="gc-type-btn'+(i<2?' urg':'')+'" onclick="setGcType(this,\''+t+'\')">'+t+'</button>').join('')+
-    '</div></div>'+
-    '<div class="card"><div class="fl" style="margin-bottom:5px;">Ilarawan ang Inyong Reklamo <span class="req">*</span></div>'+
-    '<textarea class="gc-ta" id="gc-desc" oninput="chkGc()" placeholder="Isulat dito ang detalye..."></textarea></div>'+
-    '<div class="card"><div class="fl" style="margin-bottom:5px;">Paraan ng Pakikipag-ugnayan <span style="font-size:9px;color:#94a3b8;">(opsyonal)</span></div>'+
-    '<input class="fi" id="gc-contact" placeholder="Telepono o email..." style="margin-bottom:10px;">'+
-    '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="gc-anon" style="width:18px;height:18px;"> <span style="font-size:12px;color:#5a6a7a;"><strong>Nais manatiling anonymous</strong></span></label></div>'+
-    '<div class="alert urgent" id="gc-urg" style="display:none;"><i class="ti ti-alert-triangle"></i>Mahalagang Reklamo — Ipapadala bilang priority.</div>'+
-    '<button class="pbtn" id="gc-submit-btn" onclick="submitGc(\''+station+'\')" disabled style="opacity:.5;"><i class="ti ti-send"></i>Isumite ang Reklamo</button>'+
-    '<div id="gc-done" style="display:none;"></div>'+
-    '<div style="text-align:center;font-size:10px;color:#94a3b8;padding-bottom:20px;line-height:1.6;"><strong>BULPPO PRO 3 — Human Rights Affairs</strong><br><em>"Serbisyong Mabilis, Tapat, at Nararamdaman"</em></div>'+
-    '</div>';
-}
-function setGcType(btn,type){
-  document.querySelectorAll('.gc-type-btn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  const urg=['⚠ Paglabag sa Karapatang Pantao','👤 Kapakanan ng Detinido'].includes(type);
-  document.getElementById('gc-urg').style.display=urg?'flex':'none';
-  window._gcType=type;chkGc();
-}
-function chkGc(){
-  const desc=(document.getElementById('gc-desc')?.value||'').trim();
-  const btn=document.getElementById('gc-submit-btn');
-  if(btn){const ok=window._gcType&&desc.length>=5;btn.disabled=!ok;btn.style.opacity=ok?'1':'0.5';}
-}
-async function submitGc(station){
-  const desc=(document.getElementById('gc-desc')?.value||'').trim();
-  const contact=(document.getElementById('gc-contact')?.value||'').trim();
-  const anon=document.getElementById('gc-anon')?.checked;
-  const type=window._gcType||'Iba pa';
-  const code=station.split(' ')[0].replace(/[^A-Z0-9]/gi,'').toUpperCase();
-  const ref='GC-'+code+'-'+String(Date.now()).slice(-5);
-  const concern={ref,station,type,description:desc,contact:anon?'Anonymous':contact||'Anonymous',anonymous:anon,urgent:['⚠ Paglabag sa Karapatang Pantao','👤 Kapakanan ng Detinido'].includes(type),status:'Natanggap',timestamp:new Date().toISOString()};
-  guestConcerns.unshift(concern);
-  try{localStorage.setItem('hugo_concerns',JSON.stringify(guestConcerns));}catch(e){}
-  document.getElementById('gc-submit-btn').style.display='none';
-  await sleep(800);
-  document.getElementById('gc-done').style.display='block';
-  document.getElementById('gc-done').innerHTML='<div class="card" style="text-align:center;"><div style="font-size:44px;margin-bottom:10px;">✅</div><div style="font-size:17px;font-weight:700;color:#1a2332;margin-bottom:6px;">Natanggap na ang Inyong Reklamo</div><div style="font-size:12px;color:#7a8a9a;margin-bottom:10px;">Ang inyong reference number ay:</div><div style="font-size:20px;font-weight:700;font-family:monospace;color:#0C447C;background:#E6F1FB;border-radius:10px;padding:10px;margin-bottom:12px;">'+ref+'</div><div style="font-size:11px;color:#7a8a9a;line-height:1.6;">Itago ang reference number para sa inyong follow-up.</div><button class="pbtn" style="margin-top:12px;" onclick="location.reload()"><i class="ti ti-refresh"></i>Mag-ulat ng Bagong Reklamo</button></div>';
-}
+
+
 function buildConcernsList(){
   try{const sc=localStorage.getItem('hugo_concerns');if(sc)guestConcerns=JSON.parse(sc);}catch(e){}
   const el=document.getElementById('gc-list');if(!el)return;
@@ -1692,6 +1874,48 @@ function rnd(){return Math.floor(Math.random()*900+100);}
 })();
 
 
+function checkGuestMode(){
+  var p=new URLSearchParams(window.location.search);
+  var stn=p.get('station'),tok=p.get('token');
+  if(stn&&tok==='GUEST-2025'){showGuestForm(decodeURIComponent(stn));}
+}
+function showGuestForm(station){
+  var gw=document.getElementById('guest-wrap');
+  if(!gw)return;
+  gw.style.display='flex';gw.style.flexDirection='column';
+  window._gcType='';
+  var types=['Paglabag sa Karapatang Pantao','Kapakanan ng Detinido','Kondisyon ng Pasilidad','Ugali ng Tauhan','Medikal na Alalahanin','Iba pa'];
+  var btns=types.map(function(t){return '<button class="gc-type-btn" onclick="setGcType(this,''+t+'')" style="padding:10px 8px;border:1.5px solid #d0dce8;border-radius:12px;font-size:11px;cursor:pointer;color:#5a6a7a;background:#f8fafc;text-align:center;font-family:inherit;line-height:1.3;">'+t+'</button>';}).join('');
+  gw.innerHTML='<div class="gc-hdr"><div style="width:52px;height:52px;border-radius:50%;background:#fff;margin:0 auto 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span style="font-size:13px;font-weight:700;color:#0C447C;line-height:1;">HuGo</span><span style="font-size:7px;color:#185FA5;">BULPPO</span></div><div style="font-size:17px;font-weight:700;margin-bottom:4px;">Iulat ang Inyong Reklamo</div><div style="font-size:11px;color:#B5D4F4;">Bulacan Police Provincial Office</div></div><div class="gc-body"><div class="card"><div class="alert ok" style="margin-bottom:10px;"><i class="ti ti-shield-check"></i><div><strong>Kumpidensyal at Protektado</strong><br>Maaari kayong mag-ulat nang hindi nagpapakilala.</div></div><div class="fl" style="margin-bottom:4px;">Himpilan</div><div style="padding:10px 12px;border:1px solid #d0dce8;border-radius:10px;background:#f0f4f8;font-size:13px;font-weight:600;color:#0C447C;">'+station+'</div></div><div class="card"><div class="fl" style="margin-bottom:8px;">Uri ng Reklamo <span class="req">*</span></div><div class="gc-type-grid" id="gc-types">'+btns+'</div></div><div class="card"><div class="fl" style="margin-bottom:5px;">Ilarawan ang Reklamo <span class="req">*</span></div><textarea class="gc-ta" id="gc-desc" oninput="chkGc()" placeholder="Isulat dito ang detalye..."></textarea></div><div class="card"><div class="fl" style="margin-bottom:5px;">Pakikipag-ugnayan <span style="font-size:9px;color:#94a3b8;">(opsyonal)</span></div><input class="fi" id="gc-contact" placeholder="Telepono o email..." style="margin-bottom:10px;"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="gc-anon" style="width:18px;height:18px;"> <span style="font-size:12px;"><strong>Nais manatiling anonymous</strong></span></label></div><div class="alert urgent" id="gc-urg" style="display:none;"><i class="ti ti-alert-triangle"></i>Mahalagang Reklamo - Priority.</div><button class="pbtn" id="gc-submit-btn" onclick="submitGc(''+station+'')" disabled style="opacity:.5;"><i class="ti ti-send"></i>Isumite ang Reklamo</button><div id="gc-done" style="display:none;"></div><div style="text-align:center;font-size:10px;color:#94a3b8;padding-bottom:20px;">BULPPO PRO 3 - Human Rights Affairs</div></div>';
+}
+function setGcType(btn,type){
+  document.querySelectorAll('.gc-type-btn').forEach(function(b){b.style.borderColor='#d0dce8';b.style.background='#f8fafc';b.style.fontWeight='400';b.style.color='#5a6a7a';});
+  btn.style.borderColor='#0C447C';btn.style.background='#E6F1FB';btn.style.fontWeight='700';
+  var urg=['Paglabag sa Karapatang Pantao','Kapakanan ng Detinido'].includes(type);
+  var urgEl=document.getElementById('gc-urg');if(urgEl)urgEl.style.display=urg?'flex':'none';
+  window._gcType=type;chkGc();
+}
+function chkGc(){
+  var el=document.getElementById('gc-desc');
+  var desc=(el&&el.value||'').trim();
+  var btn=document.getElementById('gc-submit-btn');
+  if(btn){var ok=window._gcType&&desc.length>=5;btn.disabled=!ok;btn.style.opacity=ok?'1':'0.5';}
+}
+async function submitGc(station){
+  var el=document.getElementById('gc-desc');var desc=(el&&el.value||'').trim();
+  var cel=document.getElementById('gc-contact');var contact=(cel&&cel.value||'').trim();
+  var ael=document.getElementById('gc-anon');var anon=ael&&ael.checked;
+  var type=window._gcType||'Iba pa';
+  var code=station.split(' ')[0].replace(/[^A-Z0-9]/gi,'').toUpperCase();
+  var ref='GC-'+code+'-'+String(Date.now()).slice(-5);
+  var concern={ref:ref,station:station,type:type,description:desc,contact:anon?'Anonymous':contact||'Anonymous',anonymous:anon,urgent:['Paglabag sa Karapatang Pantao','Kapakanan ng Detinido'].includes(type),status:'Natanggap',timestamp:new Date().toISOString()};
+  guestConcerns.unshift(concern);
+  try{localStorage.setItem('hugo_concerns',JSON.stringify(guestConcerns));}catch(e){}
+  var sb=document.getElementById('gc-submit-btn');if(sb)sb.style.display='none';
+  await sleep(800);
+  var done=document.getElementById('gc-done');
+  if(done){done.style.display='block';done.innerHTML='<div class="card" style="text-align:center;padding:20px;"><div style="font-size:44px;margin-bottom:10px;">&#10003;</div><div style="font-size:17px;font-weight:700;color:#1a2332;margin-bottom:6px;">Natanggap na ang Inyong Reklamo</div><div style="font-size:12px;color:#7a8a9a;margin-bottom:10px;">Reference number:</div><div style="font-size:20px;font-weight:700;font-family:monospace;color:#0C447C;background:#E6F1FB;border-radius:10px;padding:10px;margin-bottom:12px;">'+ref+'</div><button class="pbtn" style="margin-top:12px;" onclick="location.reload()"><i class="ti ti-refresh"></i>Mag-ulat ng Bagong Reklamo</button></div>';}
+}
 window.addEventListener('load',checkGuestMode);
 </script>
 </body>
